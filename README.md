@@ -112,10 +112,10 @@ python slurm_variant_pools.py -outdir [output directory] -c [control_pool_sample
 In version 4 analysis (Oct 2023), the following command was applied:
 
 ```
-python slurm_variant_pools.py -outdir /data/users/erane/germline/variants_pools_v7 -c control_pool_samples_v7.txt -t case_pool_samples_v7.txt
+python slurm_variant_pools.py -outdir /data/users/erane/germline/variants_pools_v7
 ```
 
-The pool lists (with number of samples) used for v7 runs. They are identical to teh v4 pools:
+The pool lists (with number of samples) used for v7 runs. They are identical to the v4 pools:
 control_pool_samples_v7.txt:
 ```
 Exp241N.normalPool.WB.untreated	40
