@@ -148,8 +148,9 @@ Another conceptual difference in the detected postion is that the positions set 
 
 ## Detect positions with variability based on individual case and control samples <a name="samples_analysis"></a>
 
-The following script uses the slurm grid to create lists of positions with observed variability, based on individual case and control samples. See lists of samples which were used in the v7 analysis in this directory.
+The following script uses the slurm grid to add to the lists observed variability in individual case and control samples. See lists of samples which were used in the v7 analysis in this directory.
 Overall in version 7 there were 484 control samples and 261 case samples.
+This stage doe snot filter anything just add information to the previous candidate positions detected in the pools stage.
 
 ```
 python slurm_detect_variants_v7.py -outdir [output directory] -c [control_pool_samples_file] -t [case_pool_samples_file]
