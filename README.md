@@ -171,7 +171,7 @@ case_samples_v7.txt
 In version 7 analysis (Dec 2023), the following command was applied:
 
 ```
-python slurm_detect_variants_v7.py -outdir /data/users/erane/germline/variants_genotypes_v7
+python slurm_detect_variants_v7.py -outdir /data/users/erane/germline/variants_genotypes_v7 -posdir /data/users/erane/germline/variants_pools_v7
 ```
 
 ## Add statistical test for differences between cases and controls <a name="statistical_tests"></a>
