@@ -148,25 +148,25 @@ Another conceptual difference in the detected postion is that the positions set 
 
 ## Detect positions with variability based on individual case and control samples <a name="samples_analysis"></a>
 
-The following script uses the slurm grid to create lists of positions with suspected variability, based on individual case and control samples. See lists of samples which were used in the v4 analysis in this directory
+The following script uses the slurm grid to create lists of positions with observed variability, based on individual case and control samples. See lists of samples which were used in the v7 analysis in this directory
 
 ```
-python slurm_detect_variants_v4.py -outdir [output directory] -c [control_pool_samples_file] -t [case_pool_samples_file]
+python slurm_detect_variants_v7.py -outdir [output directory] -c [control_pool_samples_file] -t [case_pool_samples_file]
 ```
 Note the slurm script call the following script in the grid:
 
 ```
-detect_variants_v4.py
+detect_variants_v7.py
 ```
 in parallel fashion for each chunk of bases.
 The case and control samples are hard coded in the arguments section of detect_variants_v4.py and are currently:
 
 ```
-control_samples_v4.txt
-case_samples_v4.txt
+control_samples_v7.txt
+case_samples_v7.txt
 ```
 
-In version 4 analysis (Oct 2023), the following command was applied:
+In version 7 analysis (Dec 2023), the following command was applied:
 
 ```
 python slurm_detect_variants_v4.py -outdir /data/users/erane/germline/variants_genotypes_v4
