@@ -142,6 +142,9 @@ TESExp900V.cancer.plasma.digested	39
 WGS900V.cancer.plasma.digested	108
 
 ```
+This script was changed in this version to make also the sorting. The output files "*_sorted.tsv" are therefore already sorted and there is no need for a subsequent sorting script.
+Another conceptual difference in the detected postion is that the positions set includes also positions for which at least one sample is non-reference homozygous, in order to get in the final positions set also positions which include only non-reference genotypes across all samples.
+
 
 ## Detect positions with variability based on individual case and control samples <a name="samples_analysis"></a>
 
