@@ -112,10 +112,10 @@ python slurm_variant_pools.py -outdir [output directory] -c [control_pool_sample
 In version 4 analysis (Oct 2023), the following command was applied:
 
 ```
-python slurm_variant_pools.py -outdir /data/users/erane/germline/variants_pools_v7 -c control_pool_samples_v7.txt -t case_pool_samples_v7.txt
+python slurm_variant_pools.py -outdir /data/users/erane/germline/variants_pools_v7
 ```
 
-The pool lists (with number of samples) used for v7 runs. They are identical to teh v4 pools:
+The pool lists (with number of samples) used for v7 runs. They are identical to the v4 pools:
 control_pool_samples_v7.txt:
 ```
 Exp241N.normalPool.WB.untreated	40
@@ -142,59 +142,69 @@ TESExp900V.cancer.plasma.digested	39
 WGS900V.cancer.plasma.digested	108
 
 ```
+This script was changed in this version to make also the sorting. The output files "*_sorted.tsv" are therefore already sorted and there is no need for a subsequent sorting script.
+Another conceptual difference in the detected postion is that the positions set includes also positions for which at least one sample is non-reference homozygous, in order to get in the final positions set also positions which include only non-reference genotypes across all samples.
+
+Overall number of position with suspected variablity in V7 analysis: 
+
+123685010
 
 ## Detect positions with variability based on individual case and control samples <a name="samples_analysis"></a>
 
-The following script uses the slurm grid to create lists of positions with suspected variability, based on individual case and control samples. See lists of samples which were used in the v4 analysis in this directory
+The following script uses the slurm grid to add to the lists observed variability in individual case and control samples. See lists of samples which were used in the v7 analysis in this directory.
+Overall in version 7 there were 484 control samples and 261 case samples.
+This stage doe snot filter anything just add information to the previous candidate positions detected in the pools stage.
 
 ```
-python slurm_detect_variants_v4.py -outdir [output directory] -c [control_pool_samples_file] -t [case_pool_samples_file]
+python slurm_detect_variants_v7.py -outdir [output directory] -c [control_pool_samples_file] -t [case_pool_samples_file]
 ```
 Note the slurm script call the following script in the grid:
 
 ```
-detect_variants_v4.py
+detect_variants_v7.py
 ```
 in parallel fashion for each chunk of bases.
 The case and control samples are hard coded in the arguments section of detect_variants_v4.py and are currently:
 
 ```
-control_samples_v4.txt
-case_samples_v4.txt
+control_samples_v7.txt
+case_samples_v7.txt
 ```
 
-In version 4 analysis (Oct 2023), the following command was applied:
+In version 7 analysis (Dec 2023), the following command was applied:
 
 ```
-python slurm_detect_variants_v4.py -outdir /data/users/erane/germline/variants_genotypes_v4
+python slurm_detect_variants_v7.py -outdir /data/users/erane/germline/variants_genotypes_v7 -posdir /data/users/erane/germline/variants_pools_v7
 ```
 
 ## Add statistical test for differences between cases and controls <a name="statistical_tests"></a>
 
 The following script uses the slurm grid to take lists of potential GV detected by the previous step and make statistical tests. Tests include binomial test between case and controls, binomial test between case and gnomAD external DB. Note that no filter is conducted (apart of minimal alleles represented in the samples). The stat tests p-values are added to output file and filtering is done in the next step. Also, order test is conducted for the variant frequencies (case variant allele frequency should not be between the control and the gnomAD frequencies) and coverage test to ensure minimal mean coverage at that position. See exact definitions and threholds for lasl tests in the germline pipeline document ('germline pipeline 151123.pptx')
 This script also change binary genotype (BG) of samples with low coverage to '.|.'. Low coverage  
+This step adds statistical information but does not filter based on them. The only applied filter is for minimal overall number of total alternative alleles in all samples (-min_allele_coun argument of filter_variants_freqs_v7.py)
 
 ```
-python slurm_filter_variants_freqs_v4.py -workdir [workdir]
+python slurm_filter_variants_freqs_v7.py -workdir [workdir]
 ```
 
 This script calls the following script within the grid nodes:
 
 ```
-filter_variants_freqs_v6.py
+filter_variants_freqs_v7.py
 ```
 
 
 The case and control samples are hard coded in the arguments section of filter_variants_freqs_v6.py and are currently:
 ```
-control_samples_v4.txt
-case_samples_v4.txt
+control_samples_v7.txt
+case_samples_v7.txt
 ```
 
-In version 4 analysis (Oct 2023), the following command was applied:
+In version 7 analysis (Dec 2023), the following command was applied:
 ```
-python slurm_filter_variants_freqs_v4.py -workdir /data/users/erane/germline/variants_filtered_v4_1_1/
+python slurm_filter_variants_freqs_v7.py -workdir /data/users/erane/germline/variants_filtered_v7/
 ```
+
 
 
 ## Apply statistical filters and mean coverage filters to retain relevant GVs <a name="statistical_filters"></a>
@@ -218,7 +228,7 @@ python slurm_filter_variants_freqs_reduce_v4.py -workdir /data/users/erane/germl
 ```
 
 
-## Combining files to create a single file of variants which passe the statistical and coverage tests from all chunks <a name="combine_filtered_files"></a>
+## Combining files to create a single file of variants which pass the statistical and coverage tests from all chunks <a name="combine_filtered_files"></a>
 
 Within the working directory where the variants which passed the previous step are located, type:
 ```
