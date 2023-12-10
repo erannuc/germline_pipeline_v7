@@ -181,28 +181,30 @@ python slurm_detect_variants_v7.py -outdir /data/users/erane/germline/variants_g
 
 The following script uses the slurm grid to take lists of potential GV detected by the previous step and make statistical tests. Tests include binomial test between case and controls, binomial test between case and gnomAD external DB. Note that no filter is conducted (apart of minimal alleles represented in the samples). The stat tests p-values are added to output file and filtering is done in the next step. Also, order test is conducted for the variant frequencies (case variant allele frequency should not be between the control and the gnomAD frequencies) and coverage test to ensure minimal mean coverage at that position. See exact definitions and threholds for lasl tests in the germline pipeline document ('germline pipeline 151123.pptx')
 This script also change binary genotype (BG) of samples with low coverage to '.|.'. Low coverage  
+This step adds statistical information but does not filter based on them. The only applied filter is for minimal overall number of total alternative alleles in all samples (-min_allele_coun argument of filter_variants_freqs_v7.py)
 
 ```
-python slurm_filter_variants_freqs_v4.py -workdir [workdir]
+python slurm_filter_variants_freqs_v7.py -workdir [workdir]
 ```
 
 This script calls the following script within the grid nodes:
 
 ```
-filter_variants_freqs_v6.py
+filter_variants_freqs_v7.py
 ```
 
 
 The case and control samples are hard coded in the arguments section of filter_variants_freqs_v6.py and are currently:
 ```
-control_samples_v4.txt
-case_samples_v4.txt
+control_samples_v7.txt
+case_samples_v7.txt
 ```
 
-In version 4 analysis (Oct 2023), the following command was applied:
+In version 7 analysis (Dec 2023), the following command was applied:
 ```
-python slurm_filter_variants_freqs_v4.py -workdir /data/users/erane/germline/variants_filtered_v4_1_1/
+python slurm_filter_variants_freqs_v7.py -workdir /data/users/erane/germline/variants_filtered_v7/
 ```
+
 
 
 ## Apply statistical filters and mean coverage filters to retain relevant GVs <a name="statistical_filters"></a>
@@ -226,7 +228,7 @@ python slurm_filter_variants_freqs_reduce_v4.py -workdir /data/users/erane/germl
 ```
 
 
-## Combining files to create a single file of variants which passe the statistical and coverage tests from all chunks <a name="combine_filtered_files"></a>
+## Combining files to create a single file of variants which pass the statistical and coverage tests from all chunks <a name="combine_filtered_files"></a>
 
 Within the working directory where the variants which passed the previous step are located, type:
 ```
