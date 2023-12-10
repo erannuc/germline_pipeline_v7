@@ -238,3 +238,9 @@ cat header.vcf all_stat_reduced_tmp.vcf > all_stat_reduced.vcf
 rm all_stat_reduced_tmp.vcf
 ```
 
+
+## Intesection with repeats db
+
+```
+bedtools intersect -v -a our.vcf -b ~/Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed > our_no_repeats.vcf
+```
