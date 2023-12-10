@@ -245,9 +245,25 @@ rm all_stat_reduced_tmp.vcf
 bedtools intersect -v -a our.vcf -b ~/Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed > our_no_repeats.vcf
 ```
 
+the bedtools results file is without a header, which should be added:
+
+```
+grep "#" our.vcf > our_header.vcf
+cat our_header.vcf our_no_repeats.vcf > tmp.vcf
+mv tmp.vcf our_no_repeats.vcf
+```
+
+
 ## Intersection with Sane genome regions
 
 ```
 bedtools intersect -u -a our_no_repeats.vcf -b ~/Genomes/Sane_hg38.bed > our_no_repeats_sane.vcf
 ```
 
+and reinsert the header as before:
+
+```
+grep "#" our.vcf > our_header.vcf
+cat our_header.vcf our_no_repeats.vcf > tmp.vcf
+mv tmp.vcf our_no_repeats.vcf
+```
