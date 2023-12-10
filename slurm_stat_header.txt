@@ -1,0 +1,1 @@
+chunk	total variants	case_population_test_fail	case_control_test_fail	coverage_control_test_fail	coverage_case_test_fail	af_order_test_fail	pass variants

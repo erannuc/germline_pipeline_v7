@@ -1,0 +1,15 @@
+Exp241N.normalPool.WB.untreated	40
+Exp900V.controls.plasma.digested	102
+Exp65G.normalPool2.plasma.digested	28
+Exp31G.normalPool8.plasma.digested	11
+Exp31G.normalPool7.plasma.digested	10
+Exp31G.normalPool6.plasma.digested	19
+Exp31G.normalPool5.plasma.digested	14
+Exp31G.normalPool4.plasma.digested	10
+Exp31G.normalPool3.plasma.digested	9
+Exp31G.normalPool2.plasma.digested	11
+Exp31G.normalPool1.plasma.digested	14
+Exp7W.normalPool.WB.untreated	10
+CMP003N.LOD_050623_4.plasma.untreated	40
+WGS900V.controls.plasma.digested	158
+TESExp900V.controls.plasma.digested	44
