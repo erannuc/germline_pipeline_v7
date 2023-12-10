@@ -239,8 +239,15 @@ rm all_stat_reduced_tmp.vcf
 ```
 
 
-## Intesection with repeats db
+## Intersection with repeats db
 
 ```
 bedtools intersect -v -a our.vcf -b ~/Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed > our_no_repeats.vcf
 ```
+
+## Intersection with Sane genome regions
+
+```
+bedtools intersect -u -a our_no_repeats.vcf -b ~/Genomes/Sane_hg38.bed > our_no_repeats_sane.vcf
+```
+
