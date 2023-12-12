@@ -17,7 +17,7 @@ if __name__ == "__main__":
     chunk_str = chunk_string = '_'.join([args.chr, str(args.start), str(args.end)])
 
     bed_in = f'{args.workdir}/all_intersect_affected_sorted.bed'
-    cpra_dict = []
+    cpra_dict = {}
     print("*")
     with open(bed_in) as bfh:
         # read only variants on this chromosome
@@ -26,20 +26,19 @@ if __name__ == "__main__":
             chr = data[0]
             if chr != args.chr:
                 continue
-            cpra_dict[data[v]] = 1
+            cpra_dict[data[7]] = 1
     print("**")
 
     # Now read the vcf file and create a new one only for the variants which cover cut sites
 
     vcf_in = VariantFile(f'{args.workdir}/{chunk_str}_formal.vcf.bgz')
-    vcf_out = VariantFile(f'{args.workdir}/{chunk_str}_formal_intersected.vcf.bgz', 'w', header=vcf_in.header)
-    with open()
+    vcf_out = VariantFile(f'{args.workdir}/{chunk_str}_formal_intersected.vcf.gz', 'w', header=vcf_in.header)
     for rec in vcf_in:
         chr = rec.chrom
         pos = rec.pos
         ref = rec.ref
         alt = rec.alts[0]
-        cpra = '_'.join([chr, pos, ref, alt])
+        cpra = '_'.join([chr, str(pos), ref, alt])
         print(cpra)
         if cpra in cpra_dict:
             vcf_out.write(rec)
