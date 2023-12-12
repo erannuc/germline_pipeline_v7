@@ -41,7 +41,6 @@ if __name__ == "__main__":
     chr_sizes = {c: chr_sizes[c] for c in chr_sizes if int(c) <=22}
     all_chunks = create_chunks(chr_sizes, args.chunk)
 
-    vcf_out = VariantFile(f'{args.workdir}/all_formal_intersected.vcf.gz', 'w')
     header_printed = False
     for chunk in all_chunks:
         chunk_str = '_'.join([str(i) for i in chunk])
@@ -49,7 +48,7 @@ if __name__ == "__main__":
         vcf_in = VariantFile(f'{args.workdir}/{chunk_str}_formal_intersected.vcf.gz')
         print(dir(vcf_in))
         if not header_printed:
-            vcf_out.header = vcf_in.header
+            vcf_out = VariantFile(f'{args.workdir}/all_formal_intersected.vcf.gz', 'w', header=vcf_in.header)
             header_printed = True
         for rec in vcf_in:
             vcf_out.write(rec)
