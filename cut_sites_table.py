@@ -21,8 +21,26 @@ if __name__ == "__main__":
 
     vcf_in = VariantFile(f'{args.workdir}/{chunk_str}_formal.vcf.bgz')  # auto-detect input format
 
+    affected_regions = {}
+
     for rec in vcf_in:
         chr = rec.chrom
         pos = rec.pos
         ref = rec.ref
-        print(chr, pos, ref)
+        alt = rec.alts[0]
+        print(chr, pos, ref, alt)
+        # now consider to cases according to mutation type
+        # the regions stored are in bed like inclusive-exclusive [) format
+        # and are defined as ALL positions that if methylation motif START there it
+        # will be affected by the variant
+        if len(ref) == len(alt): # substitution
+            affected_regions[(pos-3, pos +1)] = 1
+        if len(ref) > len(alt):  # deletion
+            affected_regions[(pos - 2, pos + 1 + len(ref) - len(alt))] = 1
+        if len(ref) < len(alt):  # insertion
+            affected_regions[(pos - 2, pos + 1)] = (chr, pos, ref, alt)
+
+    with open(f'{args.workdir}/{chunk_str}_affected_regions.txt', 'w') as ofh:
+        for i in affected_regions:
+            name = '_'.join(list(affected_regions[i]))
+            print('\t'.join([chr, str(i[0]), str(i[1]), name, '0', '+']))
