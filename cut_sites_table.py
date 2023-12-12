@@ -1,6 +1,6 @@
 import argparse
 from pysam import VariantFile
-
+import os
 
 
 if __name__ == "__main__":
@@ -13,8 +13,6 @@ if __name__ == "__main__":
     parser.add_argument('-start', help='last chunk to sbatch', type=int)
     parser.add_argument('-end', help='last chunk to sbatch', type=int)
     parser.add_argument('-nsamples', help='overall number of samples', type=int)
-
-    print("*")
 
     args = parser.parse_args()
     chunk_str = chunk_string = '_'.join([args.chr, str(args.start), str(args.end)])
@@ -40,8 +38,14 @@ if __name__ == "__main__":
         if len(ref) < len(alt):  # insertion
             affected_regions[(pos - 2, pos + 1)] = (chr, pos, ref, alt)
 
-    with open(f'{args.workdir}/{chunk_str}_affected_regions.txt', 'w') as ofh:
+    with open(f'{args.workdir}/{chunk_str}_affected_regions.bed', 'w') as ofh:
         for i in affected_regions:
             name = affected_regions[i][0] + '_' + str(affected_regions[i][1]) + '_' + affected_regions[i][2] + '_' + affected_regions[i][3]
             # name = '_'.join(affected_regions[i])
             print('\t'.join([chr, str(i[0]), str(i[1]), name, '0', '+']), file=ofh)
+
+    # create bed file of only cut sites
+    with open(f'{args.workdir}/{chunk_str}.bed', 'w') as bfh:
+        print('\t'.join([args.chr, str(args.start - 100), str(args.end + 100)], file=bfh)
+    os.system(f'bedtools intersect -wo -a hg38.cuts.tabs.firstbased.bed -b {args.workdir}/{chunk_str}.bed > {args.workdir}/{chunk_str}_intersect_affected.bed')
+
