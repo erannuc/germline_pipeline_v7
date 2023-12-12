@@ -17,3 +17,4 @@ if __name__ == "__main__":
     parser.add_argument('-end', help='last chunk to sbatch', type=int)
     parser.add_argument('-nsamples', help='overall number of samples', type=int)
 
+    print("*")
