@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
     bed_in = f'{args.workdir}/all_intersect_affected_sorted.bed'
     cpra_dict = {}
-    print("*")
+
     with open(bed_in) as bfh:
         # read only variants on this chromosome
         for line in bfh:
@@ -27,7 +27,6 @@ if __name__ == "__main__":
             if chr != args.chr:
                 continue
             cpra_dict[data[7]] = 1
-    print("**")
 
     # Now read the vcf file and create a new one only for the variants which cover cut sites
 
@@ -42,4 +41,3 @@ if __name__ == "__main__":
         print(cpra)
         if cpra in cpra_dict:
             vcf_out.write(rec)
-    print("***")
