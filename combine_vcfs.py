@@ -1,5 +1,5 @@
 import argparse
-
+from pysam import VariantFile
 
 
 def read_chr_sizes(genome):
@@ -42,12 +42,12 @@ if __name__ == "__main__":
     all_chunks = create_chunks(chr_sizes, args.chunk)
 
     vcf_out = VariantFile(f'{args.workdir}/all_formal_intersected.vcf.gz', 'w')
-    hedear_printed = False
+    header_printed = False
     for chunk in all_chunks:
         # print once header
         vcf_in = VariantFile(f'{args.workdir}/{chunk_str}_formal_intersected.vcf.gz')
-        if not hedear_printed:
+        if not header_printed:
             vcf_out.write(vcf_in.header)
-            hedear_printed = True
+            header_printed = True
         for rec in vcf_in:
             vcf_out.write(rec)
