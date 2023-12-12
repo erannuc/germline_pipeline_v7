@@ -28,7 +28,7 @@ if __name__ == "__main__":
         pos = rec.pos
         ref = rec.ref
         alt = rec.alts[0]
-        print(chr, pos, ref, alt)
+        # print(chr, pos, ref, alt)
         # now consider to cases according to mutation type
         # the regions stored are in bed like inclusive-exclusive [) format
         # and are defined as ALL positions that if methylation motif START there it
@@ -42,5 +42,5 @@ if __name__ == "__main__":
 
     with open(f'{args.workdir}/{chunk_str}_affected_regions.txt', 'w') as ofh:
         for i in affected_regions:
-            name = '_'.join(list(affected_regions[i]))
+            name = '_'.join(affected_regions[i])
             print('\t'.join([chr, str(i[0]), str(i[1]), name, '0', '+']))
