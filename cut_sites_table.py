@@ -17,7 +17,7 @@ if __name__ == "__main__":
     print("*")
 
     args = parser.parse_args()
-    chunk_str = chunk_string = '_'.join([chr, str(args.start), str(args.end)])
+    chunk_str = chunk_string = '_'.join([args.chr, str(args.start), str(args.end)])
 
     vcf_in = VariantFile(f'{args.workdir}/{chunk_str}_formal.vcf.bgz')  # auto-detect input format
 
