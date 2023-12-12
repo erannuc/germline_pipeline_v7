@@ -44,6 +44,7 @@ if __name__ == "__main__":
     vcf_out = VariantFile(f'{args.workdir}/all_formal_intersected.vcf.gz', 'w')
     header_printed = False
     for chunk in all_chunks:
+        chunk_string = '_'.join([str(i) for i in chunk])
         # print once header
         vcf_in = VariantFile(f'{args.workdir}/{chunk_str}_formal_intersected.vcf.gz')
         if not header_printed:
