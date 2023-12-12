@@ -34,13 +34,14 @@ if __name__ == "__main__":
         # and are defined as ALL positions that if methylation motif START there it
         # will be affected by the variant
         if len(ref) == len(alt): # substitution
-            affected_regions[(pos-3, pos +1)] = 1
+            affected_regions[(pos-3, pos +1)] = (chr, pos, ref, alt)
         if len(ref) > len(alt):  # deletion
-            affected_regions[(pos - 2, pos + 1 + len(ref) - len(alt))] = 1
+            affected_regions[(pos - 2, pos + 1 + len(ref) - len(alt))] = (chr, pos, ref, alt)
         if len(ref) < len(alt):  # insertion
             affected_regions[(pos - 2, pos + 1)] = (chr, pos, ref, alt)
 
     with open(f'{args.workdir}/{chunk_str}_affected_regions.txt', 'w') as ofh:
         for i in affected_regions:
-            name = affected_regions[i][0] + '_' + str(affected_regions[i][1]) + '_' + affected_regions[i][2] + '_' + affected_regions[i][3]
+            # name = affected_regions[i][0] + '_' + str(affected_regions[i][1]) + '_' + affected_regions[i][2] + '_' + affected_regions[i][3]
+            name = '_'.join(affected_regions[i])
             print('\t'.join([chr, str(i[0]), str(i[1]), name, '0', '+']))
