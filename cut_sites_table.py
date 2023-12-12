@@ -42,7 +42,6 @@ if __name__ == "__main__":
 
     with open(f'{args.workdir}/{chunk_str}_affected_regions.txt', 'w') as ofh:
         for i in affected_regions:
-            print(i, affected_regions[i])
             name = affected_regions[i][0] + '_' + str(affected_regions[i][1]) + '_' + affected_regions[i][2] + '_' + affected_regions[i][3]
             # name = '_'.join(affected_regions[i])
-            print('\t'.join([chr, str(i[0]), str(i[1]), name, '0', '+']))
+            print('\t'.join([chr, str(i[0]), str(i[1]), name, '0', '+']), file=ofh)
