@@ -46,7 +46,10 @@ if __name__ == "__main__":
 
     # create bed file of only cut sites
     with open(f'{args.workdir}/{chunk_str}.bed', 'w') as bfh:
-        print('\t'.join([args.chr, str(args.start - 100), str(args.end + 100)]), file=bfh)
+        new_start = args.start
+        if new_start != 0:
+            new_start -= 100
+        print('\t'.join([args.chr, str(new_start), str(args.end + 100)]), file=bfh)
     os.system(f'bedtools intersect -a hg38.cuts.tabs.firstbase.bed -b {args.workdir}/{chunk_str}.bed > {args.workdir}/{chunk_str}_cuts_firstbase.bed')
 
     os.system(f'bedtools intersect -wo -a {args.workdir}/{chunk_str}_cuts_firstbase.bed -b {args.workdir}/{chunk_str}_affected_regions.bed > {args.workdir}/{chunk_str}_intersect_affected.bed')
