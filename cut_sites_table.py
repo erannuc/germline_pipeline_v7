@@ -1,9 +1,5 @@
 import argparse
 from pysam import VariantFile
-i
-import pysam
-
-
 
 
 
