@@ -164,7 +164,7 @@ Note the slurm script call the following script in the grid:
 detect_variants_v7.py
 ```
 in parallel fashion for each chunk of bases.
-The case and control samples are hard coded in the arguments section of detect_variants_v4.py and are currently:
+The case and control samples are hard coded in the arguments section of detect_variants_v7.py and are currently:
 
 ```
 control_samples_v7.txt
@@ -209,31 +209,36 @@ python slurm_filter_variants_freqs_v7.py -workdir /data/users/erane/germline/var
 
 ## Apply statistical filters and mean coverage filters to retain relevant GVs <a name="statistical_filters"></a>
 
-The following script uses the slurm grid to take lists of potential GV with statistical test results added by the previous step and apply filters to retain 'interesting' variants. Tests which applied in this step are: (1) p-value of binomial test between case and < E10-5 (2) p-value of binomial test between case and gnomAD3.1 frequency < E10-13 (3) order test: case variant allele frequency cannot be between the control and the gnomAD frequencies (4) mean coverage test - the mean coverage of a given position across all samples should be higher than 
+The following script uses the slurm grid to take lists of potential GV with statistical test results added by the previous step and apply filters to retain 'interesting' variants. Tests which applied in this step are: (1) p-value of propotions test between case and controls < E10-3 (2) p-value of binomial test between case and gnomAD3.1 frequency < E10-10 (3) order test: case variant allele frequency cannot be between the control and the gnomAD frequencies and the gnomad frequency should be closer to the controls than the case frequencies in a 1:2 ratio (4) mean coverage test - the mean coverage of a given position across all samples should be higher than 10
 
 ```
-python slurm_filter_variants_freqs_reduce_v4.py -workdir [workdir]
+python slurm_filter_variants_freqs_reduce_v7.py -workdir [workdir]
 ```
-The case, control and pool samples should be provided and are hard coded in the arguments section of filter_variants_freqs_reduce_v4.py and are currently:
+The case, control and pool samples should be provided and are hard coded in the arguments section of filter_variants_freqs_reduce_v7.py and are currently:
 ```
-control_samples_v4.txt
-case_samples_v4.txt
-control_pool_samples_v4.txt
-case_pool_samples_v4.txt
+control_samples_v7.txt
+case_samples_v7.txt
+control_pool_samples_v7.txt
+case_pool_samples_v7.txt
 ```
-In version 4 analysis (Oct 2023), the following command was applied:
+For the partial analysis (without WGS samples besides EG controls), the following samples were used 
+
+
+In version 7 analysis (Dec 2023), the following command was applied:
 
 ```
-python slurm_filter_variants_freqs_reduce_v4.py -workdir /data/users/erane/germline/variants_filtered_v4_1_1/
+python slurm_filter_variants_freqs_reduce_v7.py -workdir /data/users/erane/germline/variants_filtered_v7/
 ```
+
+
 
 
 ## Combining files to create a single file of variants which pass the statistical and coverage tests from all chunks <a name="combine_filtered_files"></a>
 
 Within the working directory where the variants which passed the previous step are located, type:
 ```
-head -1 2_0_10000000_stat_reduced_v4.vcf > header.vcf
-awk FNR-1 *_stat_reduced_v4.vcf > all_stat_reduced_tmp.vcf
+head -1 2_0_10000000_stat_reduced_v7.vcf > header.vcf
+awk FNR-1 *_stat_reduced_v7.vcf > all_stat_reduced_tmp.vcf
 cat header.vcf all_stat_reduced_tmp.vcf > all_stat_reduced.vcf
 rm all_stat_reduced_tmp.vcf
 ```
@@ -243,13 +248,13 @@ rm all_stat_reduced_tmp.vcf
 The following script takes as input the combined output file from the previous step (all_stat_reduced.vcf) and add several QC indications 
 
 ```
-python qc_indications_v4.py -i [variants file] -case [case samples list with backup samples if available] -control [control samples list with backup samples if available] -pools_case [case pools] -pool_control [control pools] -o [output variants file with QC data] 
+python qc_indications_v7.py -i [variants file] -case [case samples list with backup samples if available] -control [control samples list with backup samples if available] -pools_case [case pools] -pool_control [control pools] -o [output variants file with QC data] 
 ```
 
-The following command was used, for example in V4:
+The following command was used, for example in V7:
 
 ```
-python qc_indications_v4.py -i lists_v4_with_opp_rand/v4_2_2/all_stat_reduced.vcf -o lists_v4_with_opp_rand/v4_2_2/all_stat_reduced_info.vcf -case case_samples_with_backup_v4.txt -control control_samples_v4.txt
+python qc_indications_v7.py -i all_stat_reduced.vcf -o variants_reduced_v7.vcf -case case_samples_with_backup_v7.txt -control control_samples_v7.txt
 ```
 
 
@@ -264,9 +269,9 @@ python convert2vcf_v7.py  -i [input_tsv_variants_list] -o [output_vcf_file_name]
 
 ```
 
-The following command was used, for example, in V4:
+The following command was used, for example, in V7:
 ```
-python convert2vcf_v4.py -i variants_reduced_v4_2_2.vcf  -o variants_reduced_formal_v4_2_2.vcf -case case_samples_v4.txt -control control_samples_v4.txt -local
+python convert2vcf_v7.py -i variants_reduced_v7.vcf  -o variants_reduced_formal_v7.vcf -case case_samples_v7.txt -control control_samples_v7.txt -local
 ```
 
 
