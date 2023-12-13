@@ -238,6 +238,54 @@ cat header.vcf all_stat_reduced_tmp.vcf > all_stat_reduced.vcf
 rm all_stat_reduced_tmp.vcf
 ```
 
+## Additional QC indications <a name="qc_indications"></a>
+
+The following script takes as input the combined output file from the previous step (all_stat_reduced.vcf) and add several QC indications 
+
+```
+python qc_indications_v4.py -i [variants file] -case [case samples list with backup samples if available] -control [control samples list with backup samples if available] -pools_case [case pools] -pool_control [control pools] -o [output variants file with QC data] 
+```
+
+The following command was used, for example in V4:
+
+```
+python qc_indications_v4.py -i lists_v4_with_opp_rand/v4_2_2/all_stat_reduced.vcf -o lists_v4_with_opp_rand/v4_2_2/all_stat_reduced_info.vcf -case case_samples_with_backup_v4.txt -control control_samples_v4.txt
+```
+
+
+## Conversion to standard vcf4.3 format <a name="vcf_conversion"></a>
+
+The following scripts takes an output format of the previous stage (could be gzipped or unzipped), no need to be indexed, and convert to standard vcf4.3 format which is useful for manipulations with public tools, includiung filtering with bcftools view and annotations with bcftools csq
+Note that the program will output all variants types at secific positions, and therefore might be several output lines for each input line. Usually only one of these is statistically significant and it should be retained in subsequent filtering.
+This command was tested on the local machine and not in the AWS. 
+
+```
+python convert2vcf_v7.py  -i [input_tsv_variants_list] -o [output_vcf_file_name] -control [list of control samples] -case [list of case samples] -local
+
+```
+
+The following command was used, for example, in V4:
+```
+python convert2vcf_v4.py -i variants_reduced_v4_2_2.vcf  -o variants_reduced_formal_v4_2_2.vcf -case case_samples_v4.txt -control control_samples_v4.txt -local
+```
+
+
+## Variant filtering command examples with bcftools view <a name="bcftools_filters"></a>
+
+Filter out by ***exclusion** criteria. Enough to fulffil one of these criteria to be **excluded** from the output:
+```
+bcftools view -e \
+'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6' \
+ all_stat_reduced_rand_info_formal.vcf.bgz > all_stat_reduced_rand2_info_formal_applied.vcf.bgz
+```
+**Inclusion** criteria. Need to fulfill all criteria to be included in the output:
+```
+bcftools view -i \
+'NF_CONT <= 0.02 && NF_CASE <= 0.02' > all_stat_reduced_rand2_info_formal_applied.vcf.bgz
+```
+
+
+
 
 ## Intersection with repeats db
 
@@ -266,3 +314,5 @@ and reinsert the header as before:
 cat our_header.vcf our_no_repeats_sane.vcf > tmp.vcf
 mv tmp.vcf our_no_repeats_sane.vcf
 ```
+
+
