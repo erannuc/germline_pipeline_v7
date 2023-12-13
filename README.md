@@ -222,7 +222,11 @@ control_pool_samples_v7.txt
 case_pool_samples_v7.txt
 ```
 For the partial analysis (without WGS samples besides EG controls), the following samples were used 
+```
+control_samples_v7p.txt
+case_samples_v7p.txt
 
+```
 
 In version 7 analysis (Dec 2023), the following command was applied:
 
@@ -288,7 +292,6 @@ bcftools view -e \
 bcftools view -i \
 'NF_CONT <= 0.02 && NF_CASE <= 0.02' > all_stat_reduced_rand2_info_formal_applied.vcf.bgz
 ```
-
 
 
 
