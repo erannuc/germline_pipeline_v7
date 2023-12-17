@@ -339,10 +339,10 @@ bcftools csq  variants_reduced_formal_v7p.vcf.bgz -f ~/Genomes/hg38.fa -g ~/Geno
 Filters based on variety of QC criteria. Variants with no calls in gnomAD are excluded in version 7 and there is additional filter for the propotions statistical test between cases and control to reduce number of variants'
 
 ```
-bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6 || GA = 8E-6 || PB > 1E-4'  variants_reduced_formal_annotated_v7.vcf.bgz > variants_reduced_formal_annotated_filtered_v7.vcf
+bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6 || GA == 8E-6 || PB > 1E-4'  variants_reduced_formal_annotated_v7.vcf.bgz > variants_reduced_formal_annotated_filtered_v7.vcf
 ```
 ```
-bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6 || GA = 8E-6 || PB > 1E-4'  variants_reduced_formal_annotated_v7p.vcf.bgz > variants_reduced_formal_annotated_filtered_v7p.vcf
+bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6 || GA == 8E-6 || PB > 1E-4'  variants_reduced_formal_annotated_v7p.vcf.bgz > variants_reduced_formal_annotated_filtered_v7p.vcf
 ```
 
 
