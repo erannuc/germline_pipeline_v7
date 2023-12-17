@@ -11,8 +11,10 @@
 8. [Combine filtered files](#combine_filtered_files)
 9. [Adding QC indications to variants file](#qc_indications)
 10. [Conversion from in-house variants format to standard vcf file](#vcf_conversion)
-11. [Filtering vcf files using INFO tag data with bcftools](#bcftools_filters)
-12. [Adding biological annotations](#bcftools_annotations)
+11. [Adding biological annotations](#bcftools_annotations)
+12. [Filtering vcf files using INFO tag data with bcftools](#bcftools_filters)
+13. [Intersection with repeats db and Sane genome regions](#bedtools_intersection)
+14. [Variant clustring based on location and gnomAD frequency](#variant_clustering)
 
 This repository include scripts and instructutions to create germline analyses based on Nucleix NGS features for individual libraries and pools.
 The pipeline scripts are expected to work in AWS linux envirounment with Slurm HPC system configued.
@@ -278,22 +280,26 @@ The following command was used, for example, in V7:
 python convert2vcf_v7.py -i variants_reduced_v7.vcf  -o variants_reduced_formal_v7.vcf -case case_samples_v7.txt -control control_samples_v7.txt -local
 ```
 
+## Ading biological annotations <a name="bcftools_annotations"></a>
+
 
 ## Variant filtering command examples with bcftools view <a name="bcftools_filters"></a>
+
+Filters based on variety of QC criteria. Variants with no calls in gnomAD are excluded in version 7 and there is additional filter for the propotions statistical test between cases and control to reduce number of variants'
 
 Filter out by ***exclusion** criteria. Enough to fulffil one of these criteria to be **excluded** from the output:
 ```
  > all_stat_reduced_rand2_info_formal_applied.vcf.bgz
 ```
 ```
-bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6 '  variants_reduced_format_v7.vcf.bgz > variants_reduced_format_filtered_v7.vcf.bgz
+bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6 || GA = 8E-6 || PB > 1E-4'  variants_reduced_format_v7.vcf.bgz > variants_reduced_format_filtered_v7.vcf
 ```
 ```
-bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6 '  variants_reduced_format_v7.vcf.bgz > variants_reduced_format_filtered_v7p.vcf.bgz
+bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6 || GA = 8E-6 || PB > 1E-4'  variants_reduced_format_v7p.vcf.bgz > variants_reduced_format_filtered_v7p.vcf
 ```
 
 
-## Intersection with repeats db and Sane genome regions
+## Intersection with repeats db and Sane genome regions <a name="bedtools_intersection"></a>
 
 The output of the previous step is intersected with simple repeats file to **exclude** overlaps and then with Sabe genome bed file to **retain** more confident regions 
 ```
@@ -303,9 +309,6 @@ bedtools intersect -header -v -a [bgzipped vcf file] -b /home/eraneyal/Genomes/u
 Example commands from the v7 analyses:
 
 
-
-
-## Ading biological annotations <a name="bcftools_annotations"></a>
 
 
 
