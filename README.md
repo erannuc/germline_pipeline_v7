@@ -265,7 +265,7 @@ python qc_indications_v7.py -i all_stat_reduced.vcf -o variants_reduced_v7.vcf -
 ## Conversion to standard vcf4.3 format <a name="vcf_conversion"></a>
 
 The following scripts takes an output format of the previous stage (could be gzipped or unzipped), no need to be indexed, and convert to standard vcf4.3 format which is useful for manipulations with public tools, includiung filtering with bcftools view and annotations with bcftools csq
-Note that the program will output all variants types at secific positions, and therefore might be several output lines for each input line. Usually only one of these is statistically significant and it should be retained in subsequent filtering.
+Note that the program will output all variants types at secific positions, and therefore might be several output lines for each input line. Usually only one of these is statistically significant and it should be retained in subsequent filtering. A change from the previous versions is that in the header tags whoch will be used during variant clustering are being added
 This command was tested on the local machine and not in the AWS. 
 
 ```
@@ -285,24 +285,32 @@ Filter out by ***exclusion** criteria. Enough to fulffil one of these criteria t
 ```
  > all_stat_reduced_rand2_info_formal_applied.vcf.bgz
 ```
-
-
-
-
-
-## Intersection with repeats db
-
 ```
-bedtools intersect -header -v -a our.vcf -b ~/Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed > our_no_repeats.vcf
+bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6 '  variants_reduced_format_v7.vcf.bgz > variants_reduced_format_filtered_v7.vcf.bgz
+```
+```
+bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6 '  variants_reduced_format_v7.vcf.bgz > variants_reduced_format_filtered_v7p.vcf.bgz
 ```
 
 
+## Intersection with repeats db and Sane genome regions
 
-## Intersection with Sane genome regions
-
+The output of the previous step is intersected with simple repeats file to **exclude** overlaps and then with Sabe genome bed file to **retain** more confident regions 
 ```
-bedtools intersect -header -u -a our_no_repeats.vcf -b ~/Genomes/Sane_hg38.bed > our_no_repeats_sane.vcf
+bedtools intersect -header -v -a [bgzipped vcf file] -b /home/eraneyal/Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed | bedtools intersect -header -u -a - -b /home/eraneyal/Genomes/Sane_hg38.bed > [bgzipped vcf file no repeats and sane]
 ```
 
+Example commands from the v7 analyses:
+
+
+
+
+## Ading biological annotations <a name="bcftools_annotations"></a>
+
+
+
+## Clustering of variants based on close proximity and gnomAD variant frequency <a name="variant_clustering"></a>
+
+In hose script is used for variant clustering. The goal is to reduce effective number of variants for training and QC purposes
 
 
