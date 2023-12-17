@@ -329,8 +329,8 @@ Note that the -p a indicates that the data is not phased. We don't know if adjuc
 The following command was used, for example, in V4:
 
 ```
-bcftools csq  variants_reduced_formal_v7.vcf -f ~/Genomes/hg38.fa -g ~/Genomes/hg38.gff3.gz -p a > variants_reduced_formal_annotated_v7.vcf
-bcftools csq  variants_reduced_formal_v7p.vcf -f ~/Genomes/hg38.fa -g ~/Genomes/hg38.gff3.gz -p a > variants_reduced_formal_annotated_v7p.vcf
+bcftools csq  variants_reduced_formal_v7.vcf.bgz -f ~/Genomes/hg38.fa -g ~/Genomes/hg38.gff3.gz -p a > variants_reduced_formal_annotated_v7.vcf
+bcftools csq  variants_reduced_formal_v7p.vcf.bgz -f ~/Genomes/hg38.fa -g ~/Genomes/hg38.gff3.gz -p a > variants_reduced_formal_annotated_v7p.vcf
 ```
 
 
