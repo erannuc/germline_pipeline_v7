@@ -350,10 +350,10 @@ bedtools intersect -header -v -a [vcf file] -b /home/eraneyal/Genomes/ucsc_Repea
 Example commands from the v7 analyses:
 
 ```
-bedtools intersect -header -v -a variants_reduced_format_annotated_filtered_v7p.vcf -b /home/eraneyal//Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed | bedtools intersect -header -u -a - -b /home/eraneyal//Genomes/Sane_hg38.bed > variants_reduced_formal_annotated_filtered_no_rep_sane_v7p.vcf
+bedtools intersect -header -v -a variants_reduced_format_annotated_filtered_v7p.vcf -b /home/eraneyal/Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed | bedtools intersect -header -u -a - -b /home/eraneyal//Genomes/Sane_hg38.bed > variants_reduced_formal_annotated_filtered_no_rep_sane_v7p.vcf
 ```
 ```
-bedtools intersect -header -v -a variants_reduced_format_annotated_filtered_v7.vcf -b /home/eraneyal//Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed | bedtools intersect -header -u -a - -b /home/eraneyal//Genomes/Sane_hg38.bed > variants_reduced_formal_annotated_filtered_no_rep_sane_v7.vcf
+bedtools intersect -header -v -a variants_reduced_format_annotated_filtered_v7.vcf -b /home/eraneyal/Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed | bedtools intersect -header -u -a - -b /home/eraneyal//Genomes/Sane_hg38.bed > variants_reduced_formal_annotated_filtered_no_rep_sane_v7.vcf
 ```
 
 ## Clustering of variants based on close proximity and gnomAD variant frequency <a name="variant_clustering"></a>
