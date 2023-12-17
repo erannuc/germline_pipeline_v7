@@ -189,7 +189,7 @@ This step adds statistical information but does not filter based on them. The on
 python slurm_filter_variants_freqs_v7.py -workdir [workdir]
 ```
 
-This script calls the following script within the grid nodes:
+This script calls the following script within the AWS grid nodes:
 
 ```
 filter_variants_freqs_v7.py
@@ -216,6 +216,12 @@ The following script uses the slurm grid to take lists of potential GV with stat
 ```
 python slurm_filter_variants_freqs_reduce_v7.py -workdir [workdir]
 ```
+
+This script call the following script in the AWS grid nodes:
+```
+filter_variants_freqs_reduce_v7.py 
+```
+
 The case, control and pool samples should be provided and are hard coded in the arguments section of filter_variants_freqs_reduce_v7.py and are currently:
 ```
 control_samples_v7.txt
@@ -249,6 +255,32 @@ cat header.vcf all_stat_reduced_tmp.vcf > all_stat_reduced.vcf
 rm all_stat_reduced_tmp.vcf
 ```
 
+When running the statistical filters step on the slurm grid slurm log files are created (slurm*.out), which contain standard outputs of the filter_variants_freqs_reduce_v7.py scripts. This output reports the number of variants which fail in each particular test.
+
+The following command can be used to combine these outputs to a single file
+
+```
+cat slurm-*out | grep -v chunk | grep -v return | grep -v RuntimeWarning | cat slurm_stat_header.txt - >  all_slurms.txt
+```
+
+The following python script report summary for the number of variants which fail in each test in all chunks together based on this file:
+
+```
+python pass_count_report.py -i all_slurms.txt
+```
+The program print report to standard output, in the following format:
+
+```
+total variants                                                         25300907
+case_population_test_fail                                              23335562
+case_control_test_fail                                                 25250749
+coverage_control_test_fail                                               357373
+coverage_case_test_fail                                                  341558
+af_order_test_fail                                                      7882404
+pass variants                                                              9336
+```
+
+
 ## Additional QC indications <a name="qc_indications"></a>
 
 The following script takes as input the combined output file from the previous step (all_stat_reduced.vcf) and add several QC indications 
@@ -272,7 +304,6 @@ This command was tested on the local machine and not in the AWS.
 
 ```
 python convert2vcf_v7.py  -i [input_tsv_variants_list] -o [output_vcf_file_name] -control [list of control samples] -case [list of case samples] -local
-
 ```
 
 The following command was used, for example, in V7:
