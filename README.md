@@ -283,44 +283,26 @@ python convert2vcf_v7.py -i variants_reduced_v7.vcf  -o variants_reduced_formal_
 
 Filter out by ***exclusion** criteria. Enough to fulffil one of these criteria to be **excluded** from the output:
 ```
-bcftools view -e \
-'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6' \
- all_stat_reduced_rand_info_formal.vcf.bgz > all_stat_reduced_rand2_info_formal_applied.vcf.bgz
+ > all_stat_reduced_rand2_info_formal_applied.vcf.bgz
 ```
-**Inclusion** criteria. Need to fulfill all criteria to be included in the output:
-```
-bcftools view -i \
-'NF_CONT <= 0.02 && NF_CASE <= 0.02' > all_stat_reduced_rand2_info_formal_applied.vcf.bgz
-```
+
+
 
 
 
 ## Intersection with repeats db
 
 ```
-bedtools intersect -v -a our.vcf -b ~/Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed > our_no_repeats.vcf
+bedtools intersect -header -v -a our.vcf -b ~/Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed > our_no_repeats.vcf
 ```
 
-the bedtools results file is without a header, which should be added:
-
-```
-grep "#" our.vcf > our_header.vcf
-cat our_header.vcf our_no_repeats.vcf > tmp.vcf
-mv tmp.vcf our_no_repeats.vcf
-```
 
 
 ## Intersection with Sane genome regions
 
 ```
-bedtools intersect -u -a our_no_repeats.vcf -b ~/Genomes/Sane_hg38.bed > our_no_repeats_sane.vcf
+bedtools intersect -header -u -a our_no_repeats.vcf -b ~/Genomes/Sane_hg38.bed > our_no_repeats_sane.vcf
 ```
 
-and reinsert the header as before:
-
-```
-cat our_header.vcf our_no_repeats_sane.vcf > tmp.vcf
-mv tmp.vcf our_no_repeats_sane.vcf
-```
 
 
