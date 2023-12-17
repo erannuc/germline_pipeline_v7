@@ -311,7 +311,21 @@ The following command was used, for example, in V7:
 python convert2vcf_v7.py -i variants_reduced_v7.vcf  -o variants_reduced_formal_v7.vcf -case case_samples_v7.txt -control control_samples_v7.txt -local
 ```
 
-## Ading biological annotations <a name="bcftools_annotations"></a>
+## Adding biological annotations <a name="bcftools_annotations"></a>
+
+Biological annotation including host genes and effect of variant (coding, amino acid change, etc.) were added by csq program of bcftools (https://samtools.github.io/bcftools/howtos/csq-calling.html)
+
+```
+bcftools csq [input vcf file] -f [genome path] -g [annotations path] -p a > [output_annotated.vcf]
+```
+Note that the -p a indicates that the data is not phased. We don't know if adjucent variants falls on the same chromosome or on the sister chromosome.
+
+The following command was used, for example, in V4:
+
+```
+bcftools csq  variants_reduced_format_v7.vcf -f ~/Genomes/hg38.fa -g ~/Genomes/hg38.gff3.gz -p a > variants_reduced_format_annotated_v7.vcf
+bcftools csq  variants_reduced_format_v7p.vcf -f ~/Genomes/hg38.fa -g ~/Genomes/hg38.gff3.gz -p a > variants_reduced_format_annotated_v7p.vcf
+```
 
 
 ## Variant filtering command examples with bcftools view <a name="bcftools_filters"></a>
@@ -323,10 +337,10 @@ Filter out by ***exclusion** criteria. Enough to fulffil one of these criteria t
  > all_stat_reduced_rand2_info_formal_applied.vcf.bgz
 ```
 ```
-bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6 || GA = 8E-6 || PB > 1E-4'  variants_reduced_format_v7.vcf.bgz > variants_reduced_format_filtered_v7.vcf
+bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6 || GA = 8E-6 || PB > 1E-4'  variants_reduced_format_annotated_v7.vcf.bgz > variants_reduced_format_annotated_filtered_v7.vcf
 ```
 ```
-bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6 || GA = 8E-6 || PB > 1E-4'  variants_reduced_format_v7p.vcf.bgz > variants_reduced_format_filtered_v7p.vcf
+bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6 || GA = 8E-6 || PB > 1E-4'  variants_reduced_format_annotated_v7p.vcf.bgz > variants_reduced_format_annotated_filtered_v7p.vcf
 ```
 
 
@@ -334,7 +348,7 @@ bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT)
 
 The output of the previous step is intersected with simple repeats file to **exclude** overlaps and then with Sabe genome bed file to **retain** more confident regions 
 ```
-bedtools intersect -header -v -a [bgzipped vcf file] -b /home/eraneyal/Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed | bedtools intersect -header -u -a - -b /home/eraneyal/Genomes/Sane_hg38.bed > [bgzipped vcf file no repeats and sane]
+bedtools intersect -header -v -a [vcf file] -b /home/eraneyal/Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed | bedtools intersect -header -u -a - -b /home/eraneyal/Genomes/Sane_hg38.bed > [vcf file no repeats and sane]
 ```
 
 Example commands from the v7 analyses:
