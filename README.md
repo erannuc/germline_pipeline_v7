@@ -73,7 +73,7 @@ features
 ```
 ## Slurm script to get feature files from the s3 bucket and unzip them <a name="get_feature_files"></a>
 
-In AWS with slurm installed, the follwing script create the above tree structure of feature files. Features are copied from their location on the nucleix.features bucket and unzipped and located under their sample (library) subdir in the local directory (aws EFS).
+In AWS with slurm installed, the follwing script create the above tree structure of feature files. Features are copied from their location on the nucleix.features bucket, unzipped and placed under their sample (library) subdir in the local directory (aws EFS).
 
 ```
 python slurm_transfer_files.py -s [samples list] -fd [features directory]
@@ -96,7 +96,7 @@ WGS001N.SL_CON874.plasma.digested
 
 ```
 
-An example command from the v7 run in DEc 2023:
+An example command from the v7 run in Dec 2023:
 
 ```
 python slurm_transfer_files.py -s case_samples_v7.txt -fd /data/users/erane/germline/features/
@@ -111,7 +111,7 @@ python slurm_variant_pools.py -outdir [output directory] -c [control_pool_sample
 ```
 
 
-In version 4 analysis (Oct 2023), the following command was applied:
+In version 7 analysis (Dec 2023), the following command was applied:
 
 ```
 python slurm_variant_pools.py -outdir /data/users/erane/germline/variants_pools_v7
@@ -179,10 +179,16 @@ In version 7 analysis (Dec 2023), the following command was applied:
 python slurm_detect_variants_v7.py -outdir /data/users/erane/germline/variants_genotypes_v7 -posdir /data/users/erane/germline/variants_pools_v7
 ```
 
+The total number of positions with variability in at least one sample in the analysis:
+```
+full analysis: 52548542
+partial analysis: 43792889
+```
+
 ## Add statistical test for differences between cases and controls <a name="statistical_tests"></a>
 
-The following script uses the slurm grid to take lists of potential GV detected by the previous step and make statistical tests. Tests include binomial test between case and controls, binomial test between case and gnomAD external DB. Note that no filter is conducted (apart of minimal alleles represented in the samples). The stat tests p-values are added to output file and filtering is done in the next step. Also, order test is conducted for the variant frequencies (case variant allele frequency should not be between the control and the gnomAD frequencies) and coverage test to ensure minimal mean coverage at that position. See exact definitions and threholds for lasl tests in the germline pipeline document ('germline pipeline 151123.pptx')
-This script also change binary genotype (BG) of samples with low coverage to '.|.'. Low coverage  
+The following script uses the slurm grid to take lists of potential GV detected by the previous step and make statistical tests. Tests include binomial and propotions test between case and controls, binomial test between case and gnomAD external DB. The stat tests p-values are added to output file and filtering is done in the next steps. Also, order test is conducted for the variant frequencies (case variant allele frequency should not be between the control and the gnomAD frequencies) and coverage test to ensure minimal mean coverage at that position. See exact definitions and threholds for the tests in the germline pipeline document ('germline pipeline 151123.pptx')
+This script also change binary genotype (BG) of samples with low coverage to '.|.'.
 This step adds statistical information but does not filter based on them. The only applied filter is for minimal overall number of total alternative alleles in all samples (-min_allele_coun argument of filter_variants_freqs_v7.py)
 
 ```
