@@ -49,7 +49,7 @@ source activate [virtual env name]/bin/activate
 
 ### Feature files <a name="feature_files"></a>
 
-Consensus Nucs, Consensus Ins, Consensus Del for all samples and pools used. All feature files should be opened (unzipped) and located within parent features directory with subsirectory for each sample:
+Consensus Nucs, Consensus Ins, Consensus Del for all samples and pools used. All feature files should be opened (unzipped) and located within parent features directory with subdirectory for each sample:
 
 ```
 features
