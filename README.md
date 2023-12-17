@@ -323,8 +323,8 @@ Note that the -p a indicates that the data is not phased. We don't know if adjuc
 The following command was used, for example, in V4:
 
 ```
-bcftools csq  variants_reduced_format_v7.vcf -f ~/Genomes/hg38.fa -g ~/Genomes/hg38.gff3.gz -p a > variants_reduced_format_annotated_v7.vcf
-bcftools csq  variants_reduced_format_v7p.vcf -f ~/Genomes/hg38.fa -g ~/Genomes/hg38.gff3.gz -p a > variants_reduced_format_annotated_v7p.vcf
+bcftools csq  variants_reduced_formal_v7.vcf -f ~/Genomes/hg38.fa -g ~/Genomes/hg38.gff3.gz -p a > variants_reduced_formal_annotated_v7.vcf
+bcftools csq  variants_reduced_formal_v7p.vcf -f ~/Genomes/hg38.fa -g ~/Genomes/hg38.gff3.gz -p a > variants_reduced_formal_annotated_v7p.vcf
 ```
 
 
@@ -332,15 +332,11 @@ bcftools csq  variants_reduced_format_v7p.vcf -f ~/Genomes/hg38.fa -g ~/Genomes/
 
 Filters based on variety of QC criteria. Variants with no calls in gnomAD are excluded in version 7 and there is additional filter for the propotions statistical test between cases and control to reduce number of variants'
 
-Filter out by ***exclusion** criteria. Enough to fulffil one of these criteria to be **excluded** from the output:
 ```
- > all_stat_reduced_rand2_info_formal_applied.vcf.bgz
-```
-```
-bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6 || GA = 8E-6 || PB > 1E-4'  variants_reduced_format_annotated_v7.vcf.bgz > variants_reduced_format_annotated_filtered_v7.vcf
+bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6 || GA = 8E-6 || PB > 1E-4'  variants_reduced_formal_annotated_v7.vcf.bgz > variants_reduced_formal_annotated_filtered_v7.vcf
 ```
 ```
-bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6 || GA = 8E-6 || PB > 1E-4'  variants_reduced_format_annotated_v7p.vcf.bgz > variants_reduced_format_annotated_filtered_v7p.vcf
+bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6 || GA = 8E-6 || PB > 1E-4'  variants_reduced_formal_annotated_v7p.vcf.bgz > variants_reduced_formal_annotated_filtered_v7p.vcf
 ```
 
 
@@ -353,12 +349,20 @@ bedtools intersect -header -v -a [vcf file] -b /home/eraneyal/Genomes/ucsc_Repea
 
 Example commands from the v7 analyses:
 
-
-
-
+```
+bedtools intersect -header -v -a variants_reduced_format_annotated_filtered_v7p.vcf -b /home/eraneyal//Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed | bedtools intersect -header -u -a - -b /home/eraneyal//Genomes/Sane_hg38.bed > variants_reduced_formal_annotated_filtered_no_rep_sane_v7p.vcf
+```
+```
+bedtools intersect -header -v -a variants_reduced_format_annotated_filtered_v7.vcf -b /home/eraneyal//Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed | bedtools intersect -header -u -a - -b /home/eraneyal//Genomes/Sane_hg38.bed > variants_reduced_formal_annotated_filtered_no_rep_sane_v7.vcf
+```
 
 ## Clustering of variants based on close proximity and gnomAD variant frequency <a name="variant_clustering"></a>
 
-In hose script is used for variant clustering. The goal is to reduce effective number of variants for training and QC purposes
+In house script is used for variant clustering. The goal is to reduce effective number of variants for training and QC purposes
 
-
+```
+python cluster_variants.py -i variants_reduced_formal_annotated_filtered_no_rep_sane_v7.vcf -o variants_reduced_formal_annotated_filtered_no_rep_sane_clustered_v7.vcf
+```
+```
+python cluster_variants.py -i variants_reduced_formal_annotated_filtered_no_rep_sane_v7p.vcf -o variants_reduced_formal_annotated_filtered_no_rep_sane_clustered_v7p.vcf
+```
