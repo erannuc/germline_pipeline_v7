@@ -384,8 +384,8 @@ python cluster_variants.py -i variants_reduced_formal_annotated_filtered_no_rep_
 ## Extraction of the cluster representatives as the filnal list <a name="cluster_representatives_extraction"></a>
 
 ```
-bcftools view -i 'RP==1' variants_reduced_new_formal_annotated_filtered_no_rep_sane_clustered_v7p.vcf  > variants_reduced_new_formal_annotated_filtered_no_rep_sane_cluster_reps_v7p.vcf
+bcftools view -i 'RP==1' variants_reduced_formal_annotated_filtered_no_rep_sane_clustered_v7p.vcf  > variants_reduced_formal_annotated_filtered_no_rep_sane_cluster_reps_v7p.vcf
 ```
 ```
-bcftools view -i 'RP==1' variants_reduced_new_formal_annotated_filtered_no_rep_sane_clustered_v7.vcf  > variants_reduced_new_formal_annotated_filtered_no_rep_sane_cluster_reps_v7.vcf
+bcftools view -i 'RP==1' variants_reduced_formal_annotated_filtered_no_rep_sane_clustered_v7.vcf  > variants_reduced_formal_annotated_filtered_no_rep_sane_cluster_reps_v7.vcf
 ```
