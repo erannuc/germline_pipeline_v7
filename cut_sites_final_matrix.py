@@ -72,5 +72,5 @@ with open(args.out, 'w') as ofh:
     # print header 
     print('\t' + '\t'.join(samples), file=ofh)
     for i in cut_sites.index:
-        pass
+        cut_site = cut_sites[0] + '_' + data[1]
 
