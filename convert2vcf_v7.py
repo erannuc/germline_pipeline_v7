@@ -40,7 +40,7 @@ def number_of_atomic_rep(atomic_rep, region):
     return n-1
 
 def homopolymer(position, chrseq, minimal_length):
-    # report the maximal homopolymer in the fragment p-minimal_length:p+minimal_length
+    # report the maximal homopolymer in the fragment position-minimal_length:position+minimal_length
     prev_char = chrseq[position-minimal_length-1]
     max_stretch = 1
     stretch = 1
@@ -256,7 +256,7 @@ def print_vcf_header(ofh, samples, mode):
     print("##genome=hg38", file=ofh)
     for i in range(1, 26):
         print(f"##contig=<ID={str(i)}>", file=ofh)
-    print("##INFO=<ID=GA,Number=G,Type=Float,Description=\"gnomAD v3.1 frequencies for all variants in that position combined\">", file=ofh)
+    print("##INFO=<ID=GA,Number=.,Type=Float,Description=\"gnomAD v3.1 frequencies for all variants in that position combined\">", file=ofh)
     print("##INFO=<ID=AC_CONT,Number=G,Type=Integer,Description=\"Total number of alternative alleles in control samples called genotypes\">", file=ofh)
     print("##INFO=<ID=AN_CONT,Number=G,Type=Integer,Description=\"Total number of alleles in control samples called genotypes\">", file=ofh)
     print("##INFO=<ID=AF_CONT,Number=G,Type=Float,Description=\"Alternative allele frequency in control samples\">", file=ofh)
@@ -267,9 +267,12 @@ def print_vcf_header(ofh, samples, mode):
     print("##INFO=<ID=AF_CASE,Number=G,Type=Float,Description=\"Alternative allele frequency in case samples\">", file=ofh)
     print("##INFO=<ID=IC_CASE,Number=G,Type=Integer,Description=\"Total number of alternative allele carriers in case samples\">", file=ofh)
     print("##INFO=<ID=IN_CASE,Number=G,Type=Float,Description=\"Total number of case samples\">", file=ofh)
-    print("##INFO=<ID=PC,Number=G,Type=Float,Description=\"Binomial test (two-sided) between control alleles and gnomAD frequency\">", file=ofh)
-    print("##INFO=<ID=PT,Number=G,Type=Float,Description=\"Binomial test (two-sided) between cases alleles and gnomAD frequency\">", file=ofh)
-    print("##INFO=<ID=PB,Number=G,Type=Float,Description=\"Propotions test (two-sided) between cases alleles and control alleles\">", file=ofh)
+    print("##INFO=<ID=PC,Number=G,Type=Float,Description=\"p-value of Binomial test (two-sided) between control alleles and gnomAD frequency\">", file=ofh)
+    print("##INFO=<ID=PT,Number=G,Type=Float,Description=\"p-value of Binomial test (two-sided) between cases alleles and gnomAD frequency\">", file=ofh)
+    print("##INFO=<ID=PB,Number=.,Type=Float,Description=\"p-value of Binomial test (two-sided) between cases alleles and control alleles\">", file=ofh)
+    print("##INFO=<ID=PR,Number=.,Type=Float,Description=\"p-value of Proportions test (two-sided) between cases alleles and control alleles\">", file=ofh)
+    print("##INFO=<ID=RP,Number=A,Type=Integer,Description=\"Flag for being a represented variants of a cluster\">", file=ofh)
+    print("##INFO=<ID=CS,Number=A,Type=Integer,Description=\"Cluster size\">", file=ofh)
     print("##INFO=<ID=RF_CONT,Number=G,Type=Float,Description=\"Read fraction of non-reference reads in Exp900V.controls.plasma.digested\">", file=ofh)
     print("##INFO=<ID=RF_CASE,Number=G,Type=Float,Description=\"Read fraction of non-reference reads in WGS900V.cancer.plasma.digested\">", file=ofh)
     print("##INFO=<ID=AFRF_CONT,Number=G,Type=Float,Description=\"AF_CONT / RF_CONT ratio\">", file=ofh)
@@ -277,12 +280,12 @@ def print_vcf_header(ofh, samples, mode):
     print("##INFO=<ID=NF_CONT,Number=G,Type=Float,Description=\"Mean non called reads frac in controls\">", file=ofh)
     print("##INFO=<ID=NF_CASE,Number=G,Type=Float,Description=\"Mean non called reads frac in cases\">", file=ofh)
     print("##INFO=<ID=ACR,Number=G,Type=Float,Description=\"ratio of the coverage of 0/1, 1/1 genotypes over 0/0 genotypes\">", file=ofh)
+    print("##INFO=<ID=PH,Number=G,Type=Float,Description=\"p-value of proportions test for Hardy–Weinberg equilibrium\">", file=ofh)
     print("##INFO=<ID=VF_CASE,Number=G,Type=Float,Description=\"Fraction of validated genotype in different case samples\">", file=ofh)
     print("##INFO=<ID=VN_CASE,Number=G,Type=Integer,Description=\"Number of Checked genotype used to compute VF_CASE\">", file=ofh)
     print("##INFO=<ID=HP,Number=G,Type=Integer,Description=\"Maximal homopolymer stretch in region\">", file=ofh)
     print("##INFO=<ID=RN,Number=G,Type=Integer,Description=\"Repeat number in region (+-10) of an indel\">", file=ofh)
-    print("##INFO=<ID=OP,Number=G,Type=Integer,Description=\"position in the original input file converted to this file\">", file=ofh)
-
+    print("##INFO=<ID=OP,Number=.,Type=Integer,Description=\"position in the original input file converted to this file\">", file=ofh)
 
     if mode=='full':
         print("##FORMAT=<ID=GT,Number=G,Type=String,Description=\"Unphased genotype\"", file=ofh)
@@ -304,8 +307,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-i', help='input our vcf', required=True)
     parser.add_argument('-o', help='output standard vcf file, with no .bgz suffix which will be added (the output file is bgzipped)', required=True)
-    parser.add_argument('-control', help='file with control samples', default='control_samples_v7.txt')
-    parser.add_argument('-case', help='file with case samples', default='case_samples_v7.txt')
+    parser.add_argument('-control', help='file with control samples', default='control_samples_v7p.txt')
+    parser.add_argument('-case', help='file with case samples', default='case_samples_v7p.txt')
 
     parser.add_argument('-mode', help='vcf mode compact (only info) or full (with samples info)', choices=['compact', 'full'], default='compact')
     parser.add_argument('-local', help='local server or aws (default)', action="store_true")
@@ -346,7 +349,8 @@ if __name__ == "__main__":
             gnomad = line_data[3]
             p_control = line_data[13]
             p_case = line_data[14]
-            p_case_control = line_data[16]
+            p_case_control_bin = line_data[15]
+            p_case_control_pr = line_data[16]
             rfcont = line_data[18]
             afrfcont = line_data[19]
             rfcase= line_data[21]
@@ -356,6 +360,7 @@ if __name__ == "__main__":
             altcr =  line_data[25]                   # alt_coverage_ratio
             vfcase = line_data[26]
             vncase = line_data[27]
+            p_hw = line_data[28]
 
             line_genotypes, line_coverages = infer_genotypes(line, genotype_indices, genome_dict[chr][pos-1], args.mode)
             control_samples_missing_genotype = len(missing_genotypes(line, control_indices))
@@ -381,7 +386,8 @@ if __name__ == "__main__":
             gnomads = []            
             p_controls = []
             p_cases = []
-            p_case_controls = []
+            p_case_controls_bin = []
+            p_case_controls_pr = []
             rf_cont = []
             afrf_cont = []
             rf_case = []
@@ -390,6 +396,7 @@ if __name__ == "__main__":
             nf_case = []
             vf_case = []
             vn_case = []
+            p_hws = []
             nreps = []
             altcrs = []
             homos = []
@@ -412,7 +419,8 @@ if __name__ == "__main__":
                 gnomads.append(gnomad)
                 p_controls.append(p_control)
                 p_cases.append(p_case)
-                p_case_controls.append(p_case_control)
+                p_case_controls_bin.append(p_case_control_bin)
+                p_case_controls_pr.append(p_case_control_pr)
                 rf_cont.append(rfcont)
                 afrf_cont.append(afrfcont)
                 rf_case.append(rfcase)
@@ -421,6 +429,7 @@ if __name__ == "__main__":
                 nf_case.append(nfcase)
                 vf_case.append(vfcase)
                 vn_case.append(vncase)
+                p_hws.append(p_hw)
                 ops.append(pos)
                 altcrs.append(altcr)
 
@@ -432,7 +441,7 @@ if __name__ == "__main__":
                     refs.append(genome_dict[chr][pos - 1])
                     alts.append(i)
                     nreps.append(0)
-                    homo = homopolymer(pos, genome_dict[chr], 7)
+                    homo = homopolymer(pos, genome_dict[chr], 6)
                     homos.append(homo)
                 elif '_' not in i: # insertion
                     inref = i[0]
@@ -450,7 +459,7 @@ if __name__ == "__main__":
                     # natomic_in_regions = region.count(atomicseq)
                     natomic_in_regions = number_of_atomic_rep(atomicseq, region)
                     nreps.append(natomic_in_regions)
-                    homo = homopolymer(invcfpos, genome_dict[chr], 7)
+                    homo = homopolymer(invcfpos, genome_dict[chr], 6)
                     homos.append(homo)
 
                     poss.append(invcfpos)
@@ -477,7 +486,7 @@ if __name__ == "__main__":
 
                     # print("**", chr, delvcfpos, del_neto, atomicseq, region, natomic_in_regions)
                     nreps.append(natomic_in_regions)
-                    homo = homopolymer(delvcfpos, genome_dict[chr], 7)
+                    homo = homopolymer(delvcfpos, genome_dict[chr], 6)
                     homos.append(homo)
 
                     poss.append(delvcfpos)
@@ -507,11 +516,12 @@ if __name__ == "__main__":
                 if variant_key not in written_variants:
                     info_str = f'GA={gnomads[i]};AC_CONT={ac_cont[i]};AN_CONT={an_cont[i]};AF_CONT={round(af_cont[i], 3)};IC_CONT={ic_cont[i]};IN_CONT={in_cont[i]};' \
                                f'AC_CASE={ac_case[i]};AN_CASE={an_case[i]};AF_CASE={round(af_case[i], 3)};IC_CASE={ic_case[i]};IN_CASE={in_case[i]};' \
-                               f'PC={format(float(p_controls[i]), ".2E")};PT={format(float(p_cases[i]), ".2E")};PB={format(float(p_case_controls[i]), ".2E")};' \
+                               f'PC={format(float(p_controls[i]), ".2E")};PT={format(float(p_cases[i]), ".2E")};PB={format(float(p_case_controls_bin[i]), ".2E")};' \
+                               f'PR={format(float(p_case_controls_pr[i]), ".2E")};' \
                                f'RF_CONT={round(float(rf_cont[i]), 3)};AFRF_CONT={round(float(afrf_cont[i]), 3)};' \
                                f'RF_CASE={round(float(rf_case[i]), 3)};AFRF_CASE={round(float(afrf_case[i]), 3)};' \
                                f'NF_CONT={round(float(nf_cont[i]), 3)};NF_CASE={round(float(nf_case[i]), 3)};ACR={round(float(altcrs[i]), 3)};' \
-                               f'VF_CASE={round(float(vf_case[i]), 3)};VN_CASE={vn_case[i]};HP={homos[i]};RN={nreps[i]};OP={ops[i]}'
+                               f'VF_CASE={round(float(vf_case[i]), 3)};VN_CASE={vn_case[i]};PH={format(float(p_hws[i]), ".2E")};HP={homos[i]};RN={nreps[i]};OP={ops[i]}'
                     print(f'{chr}\t{str(poss[i])}\t.\t{refs[i]}\t{alts[i]}\t.\t.\t{info_str}', end='', file=ofh)
                     if args.mode == 'full':
                         print(formats[i], file=ofh)
