@@ -15,6 +15,7 @@
 12. [Filtering vcf files using INFO tag data with bcftools](#bcftools_filters)
 13. [Intersection with repeats db and Sane genome regions](#bedtools_intersection)
 14. [Variant clustring based on location and gnomAD frequency](#variant_clustering)
+15. [Filtering only cluster representatives as the filnal list](#cluster_representatives_extraction)
 
 This repository include scripts and instructutions to create germline analyses based on Nucleix NGS features for individual libraries and pools.
 The pipeline scripts are expected to work in AWS linux envirounment with Slurm HPC system configued.
@@ -380,4 +381,11 @@ python cluster_variants.py -i variants_reduced_formal_annotated_filtered_no_rep_
 ```
 python cluster_variants.py -i variants_reduced_formal_annotated_filtered_no_rep_sane_v7p.vcf -o variants_reduced_formal_annotated_filtered_no_rep_sane_clustered_v7p.vcf
 ```
+## Extraction of the cluster representatives as the filnal list <a name="cluster_representatives_extraction"></a>
 
+```
+bcftools view -i 'RP==1' variants_reduced_new_formal_annotated_filtered_no_rep_sane_clustered_v7p.vcf  > variants_reduced_new_formal_annotated_filtered_no_rep_sane_cluster_reps_v7p.vcf
+```
+```
+bcftools view -i 'RP==1' variants_reduced_new_formal_annotated_filtered_no_rep_sane_clustered_v7.vcf  > variants_reduced_new_formal_annotated_filtered_no_rep_sane_cluster_reps_v7.vcf
+```
