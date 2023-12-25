@@ -3,7 +3,9 @@ from scipy.stats import chi2_contingency
 from Bio import SeqIO
 import numpy as np
 import pandas as pd
+import math
 import gzip
+from statsmodels.stats.proportion import proportions_ztest
 
 from nucleix_features import FeaturesAnalysis
 
@@ -138,6 +140,16 @@ def calculate_mean_non_called_reads(line_data, control_indices, case_indices):
         fracs_non_called_case.append(frac_non_called_case)
 
     return sum(fracs_non_called_control) / len(fracs_non_called_control), sum(fracs_non_called_case) / len(fracs_non_called_case)
+
+def calculate_HW_score(control_alt_alleles, control_carriers, total_controls):
+    # perform statistical_test_to_check_the_hypothesis_of_HW_equilibrium
+    af = control_alt_alleles / (2 * total_controls)
+    homo_observed = control_alt_alleles - control_carriers
+    homo_expected = control_alt_alleles * control_alt_alleles / 4 / total_controls
+    stat_hw_prop, pval_hw_prop = proportions_ztest([homo_observed, homo_expected], [2 * total_controls, 2 * total_controls])
+    if math.isnan(float(pval_hw_prop)):
+        pval_hw_prop = 1.0
+    return pval_hw_prop
 
 def non_called_reads(nucs, indels_str):
     if indels_str:
@@ -283,7 +295,7 @@ def list_analysis(input_quazi_vcf, output_quazi_vcf, control_samples, case_sampl
         header_fields = header.split('\t')
 
         new_columns = ['af_controls', 'rf_controls', 'afrf_controls', 'af_case', 'rf_case', 'afrf_case', 'mean_non_called_reads_frac_controls',
-                       'mean_non_called_reads_frac_case', 'alt_coverage_ratio', 'fraction_alt_genotype_validated', 'number_alt_genotype_checked']
+                       'mean_non_called_reads_frac_case', 'alt_coverage_ratio', 'fraction_alt_genotype_validated', 'number_alt_genotype_checked', 'hw_pval']
 
         output_header_fields = header_fields[:17] + new_columns + header_fields[17:]
         print('\t'.join(output_header_fields), file=ofh)
@@ -294,6 +306,8 @@ def list_analysis(input_quazi_vcf, output_quazi_vcf, control_samples, case_sampl
         tot_alleles_control_index = header_fields.index('tot_alleles_control')
         alt_alleles_case_index = header_fields.index('alt_alleles_case')
         tot_alleles_case_index = header_fields.index('tot_alleles_case')
+        car_control_index = header_fields.index('car_control')
+        tot_control_index = header_fields.index('tot_control')
         genotype_indices, control_indices, case_indices, index2sample, sample2index = find_genotype_indices(header, list(control_samples.keys()), list(case_samples.keys()))
 
         ochits_index_dict = {sample2index[s]: ochits_dict[s] for s in ochits_dict}
@@ -344,6 +358,8 @@ def list_analysis(input_quazi_vcf, output_quazi_vcf, control_samples, case_sampl
 
             alt_coverage_ratio = calculate_alt_coverage_ratio(line_data, control_indices, case_indices, ochits_index_dict)
 
+            hw_pval = calculate_HW_score(int(line_data[alt_alleles_control_index]), int(line_data[car_control_index]), int(line_data[tot_control_index]))
+
             # print(mean_non_called_reads_controls, mean_non_called_reads_case)
 
             # now search for genotype agreement percentage in the backup samples
@@ -355,7 +371,7 @@ def list_analysis(input_quazi_vcf, output_quazi_vcf, control_samples, case_sampl
 
             for i in case_samples:
 
-                # check only hetero/homzygous genotype and only sample with back-up
+                # check only hetero/homozygous genotype and only sample with back-up
 
                 if case_samples[i] == 'None':
                     continue
@@ -388,7 +404,7 @@ def list_analysis(input_quazi_vcf, output_quazi_vcf, control_samples, case_sampl
             print("#######", total_variants, fraction_alt_genotype_validated, alt_genotypes_checked, alt_coverage_ratio)
 
             new_data_columns = [str(af_controls), str(rf_controls), str(afrf_controls), str(af_case), str(rf_case), str(afrf_case), str(mean_non_called_reads_controls),
-                        str(mean_non_called_reads_case), str(alt_coverage_ratio), str(fraction_alt_genotype_validated), str(alt_genotypes_checked)]
+                        str(mean_non_called_reads_case), str(alt_coverage_ratio), str(fraction_alt_genotype_validated), str(alt_genotypes_checked), f'{hw_pval:.2E}']
 
             output_data_fields = line_data[:17] + new_data_columns + line_data[17:]
             print('\t'.join(output_data_fields), file=ofh)
@@ -406,11 +422,11 @@ def list_analysis(input_quazi_vcf, output_quazi_vcf, control_samples, case_sampl
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-i', help='file in our internal vcf format with input variants. could be gzipped or not')
-    parser.add_argument('-case', help='file with list of case samples', default='case_samples_with_backup_v7.txt')
-    parser.add_argument('-control', help='file with list of control samples and bachup samples', default='control_samples_v7.txt')
+    parser.add_argument('-case', help='file with list of case samples', default='case_samples_with_backup_v7p.txt')
+    parser.add_argument('-control', help='file with list of control samples and bachup samples', default='control_samples_v7p.txt')
     parser.add_argument('-pools_case', help='file with list of pool of case samples and backup samples', default='case_pool_samples_v7.txt')
     parser.add_argument('-pools_control', help='file with list of pool of control samples', default='control_pool_samples_v7.txt')
-    parser.add_argument('-o', help='file in our internal vcf format with output variants', default='variants_reduced_v7.vcf')
+    parser.add_argument('-o', help='file in our internal vcf format with output variants', default='variants_reduced_v7p.vcf')
 
     global args
     args = parser.parse_args()
