@@ -336,7 +336,13 @@ bcftools csq  variants_reduced_formal_v7p.vcf.bgz -f ~/Genomes/hg38.fa -g ~/Geno
 
 ## Variant filtering command examples with bcftools view <a name="bcftools_filters"></a>
 
-Filters based on variety of QC criteria. Variants with no calls in gnomAD are excluded in version 7 and there is additional filter for the propotions statistical test between cases and control to reduce number of variants'
+Filters based on variety of QC criteria. 
+
+Differences in filtering comparing to V4:
+ <li> The cose-control is now based on propotions test (PR tag) and the final thershold set to < 1*10-3
+ <li> Variants with no calls in gnomAD are excluded 
+ <li> Maximum homoplymer stretch is 5 (instead 6 before)
+ <li> Variants with Hardy–Weinberg test p-value with p-value (PH tag) < 1*E-3 are excluded
 
 ```
 bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || HP > 6 || GA == 8E-6 || PB > 1E-4'  variants_reduced_formal_annotated_v7.vcf.bgz > variants_reduced_formal_annotated_filtered_v7.vcf
