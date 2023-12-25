@@ -4,7 +4,7 @@
 1. [Prerequisites](#prerequisites)
 2. [Feature files](#feature_files)
 3. [Get feature files](#get_feature_files)
-4. [Detect positions with candidate GVs based on pools sample](#pools_analysis)
+4. [Detect positions with candidate GVs based on pools samples](#pools_analysis)
 5. [Detect positions with GVs based on individual samples](#samples_analysis)
 6. [Statistical tests data](#statistical_tests)
 7. [Statistical tests filters](#statistical_filters)
@@ -381,6 +381,3 @@ python cluster_variants.py -i variants_reduced_formal_annotated_filtered_no_rep_
 python cluster_variants.py -i variants_reduced_formal_annotated_filtered_no_rep_sane_v7p.vcf -o variants_reduced_formal_annotated_filtered_no_rep_sane_clustered_v7p.vcf
 ```
 
-```python
-print("Hello")
-```
