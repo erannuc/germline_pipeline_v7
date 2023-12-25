@@ -339,10 +339,10 @@ bcftools csq  variants_reduced_formal_v7p.vcf.bgz -f ~/Genomes/hg38.fa -g ~/Geno
 Filters based on variety of QC criteria. 
 
 Differences in filtering comparing to V4:
- <li> The cose-control is now based on propotions test (PR tag) and the final thershold set to < 1*10-3
- <li> Variants with no calls in gnomAD are excluded 
- <li> Maximum homoplymer stretch is 5 (instead 6 before)
- <li> Variants with Hardy–Weinberg test p-value with p-value (PH tag) < 1*E-3 are excluded
+ <li> The cose-control is now based on propotions test (PR tag) and the final thershold set to < 1*10-3</li>
+ <li> Variants with no calls in gnomAD are excluded </li>
+ <li> Maximum homoplymer stretch is 5 (instead 6 before)</li>
+ <li> Variants with Hardy–Weinberg test p-value with p-value (PH tag) < 1*E-3 are excluded</li>
 
 
 ```
