@@ -55,7 +55,8 @@ with open(f'{args.workdir}/all_intersect_affected_sorted.bed') as bfh:
 
 vcf_in = VariantFile(f'{args.workdir}/all_formal_intersected.vcf.gz')
 for rec in vcf_in:
-    cpra = '_'.join([rec.chrom, str(rec.pos), rec,ref, rec.alts[0]])
+    cpra = '_'.join([rec.chrom, str(rec.pos), rec.ref, rec.alts[0]])
+    print(cpra)
     gts = [s['GT'] for s in rec.samples.values()]
     for i in range(len(gts)):
         if gts[i] == (0, 1) or gts[i] == (1, 1): 
@@ -63,7 +64,7 @@ for rec in vcf_in:
             if cpra in cpra2sites:
                 for s in cpra2sites[cpra]:
                     si = sites2index[s]
-                    cut_sites_vectors[si].on[i]
+                    cut_sites_vectors[si].on(i)
 
 
 # go over the cutsites and print matrix
@@ -72,5 +73,5 @@ with open(args.out, 'w') as ofh:
     # print header 
     print('\t' + '\t'.join(samples), file=ofh)
     for i in cut_sites.index:
-        pass
-
+        cut_site = str(cut_sites.at[i, 0]) + '_' + str(cut_sites.at[i, 1] + 1) + '_' + str(cut_sites.at[i, 2]) + '_' + str(cut_sites.at[i, 3]) 
+        print(cut_site + '\t' + '\t'.join([str(cut_sites_vectors[i].get(s)) for s in range(nsamples)]), file=ofh)
