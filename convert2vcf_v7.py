@@ -64,11 +64,11 @@ def find_genotype_indices(header_line, control_samples, case_samples):
     case_indices = [i for i in range(len(header_fields)) if header_fields[i].endswith('genotype') and header_fields[i][:-9] in case_samples]
     index2sample = {i: header_fields[i][:-9] for i in range(len(header_fields)) if header_fields[i].endswith('genotype')}
     sample2index = {header_fields[i][:-9]: i for i in range(len(header_fields)) if header_fields[i].endswith('genotype')}
+    all_samples = [header_fields[i][:-9] for i in range(len(header_fields)) if header_fields[i].endswith('genotype')]
+    return genotype_indices, control_indices, case_indices, index2sample, sample2index, all_samples
 
-    return genotype_indices, control_indices, case_indices, index2sample, sample2index
 
-
-def infer_genotypes(line, genotype_indices, reference_base, mode):
+def infer_genotypes(line, genotype_indices, analysis_indices, reference_base, mode):
 
     line_data = line.strip().split('\t')
     # get all samples with alt genotype
@@ -92,7 +92,11 @@ def infer_genotypes(line, genotype_indices, reference_base, mode):
             for i in indels:
                 k, v = i.split(':')
                 indels_sample[k] = int(v)
-        sampleg, samplecov = sample_genotype(line_data[a-5:a-1], indels_sample, reference_base)
+        # here make 2 options:genotype with and without coverage check by adding coverage th parameter to sample_genotype()
+        if a in analysis_indices:
+            sampleg, samplecov = sample_genotype(line_data[a-5:a-1], indels_sample, reference_base, 10)
+        else:
+            sampleg, samplecov = sample_genotype(line_data[a - 5:a - 1], indels_sample, reference_base, 0)
         for g in samplecov:
             if g not in linecov:
                 linecov[g] = {a: samplecov[g]}
@@ -107,7 +111,7 @@ def infer_genotypes(line, genotype_indices, reference_base, mode):
 
     return lineg, linecov
 
-def sample_genotype(nucs, indels, reference_base):
+def sample_genotype(nucs, indels, reference_base, coverage_th):
     indel_coverage = sum(indels.values())
     nucs = [int(n) for n in nucs]
     nucs_coverage = sum(nucs)
@@ -118,13 +122,13 @@ def sample_genotype(nucs, indels, reference_base):
         coverages[base_map[i]] = nucs[i]
         if nucs[i] / sumreads > 0.8:
             if base_map[i] != reference_base:
-                if sumreads < 10:
+                if sumreads < coverage_th:
                     genotypes[base_map[i]] = ('.', '.')
                 else:
                     genotypes[base_map[i]] = (1, 1)
         elif nucs[i] / sumreads >= 0.2:
            if base_map[i] != reference_base:
-                if sumreads < 10:
+                if sumreads < coverage_th:
                     genotypes[base_map[i]] = ('.', '.')
                 else:
                     genotypes[base_map[i]] = (0, 1)
@@ -132,12 +136,12 @@ def sample_genotype(nucs, indels, reference_base):
         coverages[i] = indels[i]
         # check if one of the indels can be called:
         if indels[i] / sumreads > 0.8:
-            if sumreads < 10:
+            if sumreads < coverage_th:
                 genotypes[i] = ('.', '.')
             else:
                 genotypes[i] = (1, 1)
         elif indels[i] / sumreads >= 0.2:
-            if sumreads < 10:
+            if sumreads < coverage_th:
                 genotypes[i] = ('.', '.')
             else:
                 genotypes[i] = (0, 1)
@@ -250,7 +254,7 @@ def get_subseq(chrseq, start, end):
     return str(chrseq[start - 1:end])
 
 
-def print_vcf_header(ofh, samples, mode):
+def print_vcf_header(ofh, analysis_samples, all_samples, mode, all_samples_flag):
     print("##fileformat=VCFv4.3", file=ofh)
     print("##date=" + datetime.now().strftime("%d/%m/%Y:%H:%M:%S"), file=ofh)
     print("##genome=hg38", file=ofh)
@@ -288,6 +292,10 @@ def print_vcf_header(ofh, samples, mode):
     print("##INFO=<ID=OP,Number=.,Type=Integer,Description=\"position in the original input file converted to this file\">", file=ofh)
 
     if mode=='full':
+        if all_samples_flag:
+            samples = all_samples
+        else:
+            samples = analysis_samples
         print("##FORMAT=<ID=GT,Number=G,Type=String,Description=\"Unphased genotype\"", file=ofh)
         print("##FORMAT=<ID=AP,Number=G,Type=Integer,Description=\"Number of covering reads with pair-end consensus supporting the allele call at this position\"", file=ofh)
         print("##FORMAT=<ID=DP,Number=G,Type=Integer,Description=\"Number of covering reads with pair-end consensus call at this position\"", file=ofh)
@@ -307,10 +315,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-i', help='input our vcf', required=True)
     parser.add_argument('-o', help='output standard vcf file, with no .bgz suffix which will be added (the output file is bgzipped)', required=True)
-    parser.add_argument('-control', help='file with control samples', default='control_samples_no_eg_v7p.txt')
-    parser.add_argument('-case', help='file with case samples', default='case_samples_v7p.txt')
+    parser.add_argument('-control', help='file with control samples', default='control_samples_v7.txt')
+    parser.add_argument('-case', help='file with case samples', default='case_samples_v7.txt')
 
     parser.add_argument('-mode', help='vcf mode compact (only info) or full (with samples info)', choices=['compact', 'full'], default='compact')
+    parser.add_argument('-all_samples', help='in full mode incluse all samples and not only samples defined as case and control', action="store_true")
     parser.add_argument('-local', help='local server or aws (default)', action="store_true")
 
 
@@ -336,9 +345,9 @@ if __name__ == "__main__":
 
     written_variants = set()
     with (gzip.open if args.i.endswith("gz") else open)(args.i, 'tr') as ifh, open(args.o + '.tmp.vcf', 'w') as ofh:
-        print_vcf_header(ofh, control_samples + case_samples, args.mode)
         header_line = ifh.readline()
-        genotype_indices, control_indices, case_indices, index2sample, sample2index = find_genotype_indices(header_line.strip(), control_samples, case_samples)
+        genotype_indices, control_indices, case_indices, index2sample, sample2index, all_samples = find_genotype_indices(header_line.strip(), control_samples, case_samples)
+        print_vcf_header(ofh, control_samples + case_samples, all_samples, args.mode, args.all_samples)
 
         linecount = 0
         for line in ifh:
@@ -362,7 +371,7 @@ if __name__ == "__main__":
             vncase = line_data[27]
             p_hw = line_data[28]
 
-            line_genotypes, line_coverages = infer_genotypes(line, genotype_indices, genome_dict[chr][pos-1], args.mode)
+            line_genotypes, line_coverages = infer_genotypes(line, genotype_indices, control_indices + case_indices, genome_dict[chr][pos-1], args.mode)
             control_samples_missing_genotype = len(missing_genotypes(line, control_indices))
             case_samples_missing_genotype = len(missing_genotypes(line, case_indices))
             # if control_samples_missing_genotype > 0:
@@ -495,7 +504,11 @@ if __name__ == "__main__":
                 if args.mode == 'full':
                     # create string line with info data for each alternative allele
                     format_str = "\tGT:AP:DP"
-                    for s in control_samples + case_samples:
+                    if args.all_samples:
+                        samples_to_include = all_samples
+                    else:
+                        samples_to_include = control_samples + case_samples
+                    for s in samples_to_include:
                         dp = line_data[sample2index[s] + 1]
                         format_str += '\t'
                         if sample2index[s] not in line_genotypes[i]:
