@@ -230,9 +230,9 @@ def print_vcf_header(ofh, samples, mode):
     print("##INFO=<ID=AF_CASE,Number=G,Type=Float,Description=\"Alternative allele frequency in case samples\">", file=ofh)
     print("##INFO=<ID=IC_CASE,Number=G,Type=Integer,Description=\"Total number of alternative allele carriers in case samples\">", file=ofh)
     print("##INFO=<ID=IN_CASE,Number=G,Type=Float,Description=\"Total number of case samples\">", file=ofh)
-    print("##INFO=<ID=PC,Number=G,Type=Float,Description=\"Binomial test (two-sided) between cases alleles and gnomAD frequency\">", file=ofh)
-    print("##INFO=<ID=PT,Number=G,Type=Float,Description=\"Binomial test (two-sided) between control alleles and gnomAD frequency\">", file=ofh)
-    print("##INFO=<ID=PB,Number=G,Type=Float,Description=\"Binomial test (two-sided) between cases alleles and control alleles\">", file=ofh)
+    print("##INFO=<ID=PC,Number=G,Type=Float,Description=\"Binomial test (two-sided) between control alleles and gnomAD frequency\">", file=ofh)
+    print("##INFO=<ID=PT,Number=G,Type=Float,Description=\"Binomial test (two-sided) between case (tumor) alleles and gnomAD frequency\">", file=ofh)
+    print("##INFO=<ID=PR,Number=G,Type=Float,Description=\"Proportions test (two-sided) between cases alleles and control alleles\">", file=ofh)
     if mode=='full':
         print("##FORMAT=<ID=GT,Number=G,Type=String,Description=\"Unphased genotype\"", file=ofh)
         print("##FORMAT=<ID=AP,Number=G,Type=Integer,Description=\"Number of covering reads with pair-end consensus supporting the allele call at this position\"", file=ofh)
@@ -245,7 +245,7 @@ def print_vcf_header(ofh, samples, mode):
 def missing_genotypes(line, indices):
     line_data = line.strip().split('\t')
     # search for unresolved genotype
-    missing_genotypes_indices = [i for i in indices if '?' in line_data[i]]
+    missing_genotypes_indices = [i for i in indices if '?' in line_data[i] or '.' in line_data[i]]
     return missing_genotypes_indices
 
 if __name__ == "__main__":
@@ -258,7 +258,7 @@ if __name__ == "__main__":
 
     parser.add_argument('-mode', help='vcf mode compact (only info) or full (with samples info)', choices=['compact', 'full'], default='compact')
 
-    # this script convert from out pseudo vcf format to standard VCF format compatible with bcftools csq
+    # this script convert from out pseudo vcf format to standard VCF format compatible with bcftools csq, before adding additional QC fields 
 
     global args
     args = parser.parse_args()
@@ -272,6 +272,7 @@ if __name__ == "__main__":
     genome_dict = read_genome(genome)
 
     chr_sizes = read_chr_sizes(genome)
+    chr_sizes = {c: chr_sizes[c] for c in chr_sizes if int(c) <=22}
 
     written_variants = set()
     with (gzip.open if args.i.endswith("gz") else open)(args.i, 'tr') as ifh, open(args.o + '.tmp.vcf', 'w') as ofh:
@@ -384,7 +385,7 @@ if __name__ == "__main__":
                 if variant_key not in written_variants:
                     info_str = f'GA={gnomads[i]};AC_CONT={ac_cont[i]};AN_CONT={an_cont[i]};AF_CONT={round(af_cont[i], 3)};IC_CONT={ic_cont[i]};IN_CONT={in_cont[i]};' \
                                f'AC_CASE={ac_case[i]};AN_CASE={an_case[i]};AF_CASE={round(af_case[i], 3)};IC_CASE={ic_case[i]};IN_CASE={in_case[i]};' \
-                               f'PC={format(float(p_controls[i]), ".2E")};PT={format(float(p_cases[i]), ".2E")};PB={format(float(p_case_controls[i]), ".2E")}'
+                               f'PC={format(float(p_controls[i]), ".2E")};PT={format(float(p_cases[i]), ".2E")};PR={format(float(p_case_controls[i]), ".2E")}'
                     print(f'{chr}\t{str(poss[i])}\t.\t{refs[i]}\t{alts[i]}\t.\t.\t{info_str}', end='', file=ofh)
                     if args.mode == 'full':
                         print(formats[i], file=ofh)
