@@ -183,13 +183,17 @@ def calculate_alt_coverage_ratio(line_data, control_indices, case_indices, ochit
         if line_data[i] == '0|1' or line_data[i] == '1|1':
             ngen1 += 1
             sum1 += int(line_data[i+1]) / ochits_index_dict[i]
+            # print("*1*", int(line_data[i+1]), ochits_index_dict[i], int(line_data[i+1]) / ochits_index_dict[i])
         elif line_data[i] == '0|0':
             ngen0 += 1
             sum0 += int(line_data[i+1]) / ochits_index_dict[i]
+            # print("*0*", int(line_data[i+1]), ochits_index_dict[i], int(line_data[i+1]) / ochits_index_dict[i])
     if ngen0 == 0 or ngen1 == 0:
         alt_coverage_ratio = 1.00
     else:
         alt_coverage_ratio = (sum1 / (ngen1 + tiny)) / (sum0 / (ngen0 + tiny) + tiny)
+        if alt_coverage_ratio > 2 or alt_coverage_ratio < 0.5:
+            print(sum1, ngen1, sum0, ngen0, alt_coverage_ratio)
 
     return alt_coverage_ratio
 
@@ -401,7 +405,7 @@ def list_analysis(input_quazi_vcf, output_quazi_vcf, control_samples, case_sampl
 
 
             fraction_alt_genotype_validated = alt_genotypes_supported / (alt_genotypes_checked + tiny)
-            print("#######", total_variants, fraction_alt_genotype_validated, alt_genotypes_checked, alt_coverage_ratio)
+            # print("#######", total_variants, fraction_alt_genotype_validated, alt_genotypes_checked, alt_coverage_ratio)
 
             new_data_columns = [str(af_controls), str(rf_controls), str(afrf_controls), str(af_case), str(rf_case), str(afrf_case), str(mean_non_called_reads_controls),
                         str(mean_non_called_reads_case), str(alt_coverage_ratio), str(fraction_alt_genotype_validated), str(alt_genotypes_checked), f'{hw_pval:.2E}']
@@ -422,11 +426,11 @@ def list_analysis(input_quazi_vcf, output_quazi_vcf, control_samples, case_sampl
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-i', help='file in our internal vcf format with input variants. could be gzipped or not')
-    parser.add_argument('-case', help='file with list of case samples', default='case_samples_with_backup_v7p.txt')
-    parser.add_argument('-control', help='file with list of control samples and bachup samples', default='control_samples_v7p.txt')
+    parser.add_argument('-case', help='file with list of case samples', default='case_samples_with_backup_v7.txt')
+    parser.add_argument('-control', help='file with list of control samples and bachup samples', default='control_samples_v7.txt')
     parser.add_argument('-pools_case', help='file with list of pool of case samples and backup samples', default='case_pool_samples_v7.txt')
     parser.add_argument('-pools_control', help='file with list of pool of control samples', default='control_pool_samples_v7.txt')
-    parser.add_argument('-o', help='file in our internal vcf format with output variants', default='variants_reduced_v7p.vcf')
+    parser.add_argument('-o', help='file in our internal vcf format with output variants', default='variants_reduced_v7.vcf')
 
     global args
     args = parser.parse_args()
