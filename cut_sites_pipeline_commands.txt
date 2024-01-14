@@ -1,0 +1,11 @@
+awk '{print($1"\t"$2"\t"$2+1"\t"$4)}' hg38.cuts.tabs.bed > hg38.cuts.tabs.firstbase.bed  # create bed file of the first base in each cut site, needed for the intersection
+source /data/users/erane/germline/venv_germline/bin/activate
+python slurm_cut_sites_table.py       # convert to official vcf format
+python slurm_cut_sites_table2.py      # create bed file with intesection of variant effect with cut sites
+cat *_intersect_affected.bed > all_intersect_affected.bed   # in the working library
+bedtools sort -i /data/users/erane/germline/variants_full_formal_vcf_v7/all_intersect_affected.bed > /data/users/erane/germline/variants_full_formal_vcf_v7/all_intersect_affected_sorted.bed
+python slurm_cut_sites_table3.py      # create smaller vcf files with only variants which affect cut sites (around 1.6M) 
+python combine_vcfs.py                # combine the vcf files of each chunk from the previous step to a single file
+
+python cut_sites_final_matrix.py      # create binary matrix cut_sites x samples and print it
+python cut_sites_final_matrix_4states.py # create 4 states matrix cut_sites x samples and print it
