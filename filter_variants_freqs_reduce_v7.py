@@ -102,8 +102,10 @@ def chunk_analysis(chr, start, end, control_samples, case_samples, chunk_seq, wo
         coverage_control_test_fail = 0
         coverage_case_test_fail = 0
         af_order_test_fail = 0
-
+        failure_nature_dict = {'1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '12': 0, '13': 0, '14': 0, '15': 0, '23': 0, '24': 0, '25': 0,
+                               '34': 0, '35': 0, '45': 0, '123': 0, '124': 0, '125':0, '234': 0, '235': 0, '345': 0, '1234': 0, '1235': 0, '1245': 0, '2345': 0, '12345': 0} 
         for line in ifh:
+            failure_info = ''
             line_data = line.strip().split('\t')
             # print(line_data[pvalue_case_twoside_index], line_data[pvalue_case_control_twoside_index])
             control_mean_coverage = mean([int(line_data[i]) for i in control_coverage_indices])
@@ -114,31 +116,42 @@ def chunk_analysis(chr, start, end, control_samples, case_samples, chunk_seq, wo
             # print(control_mean_coverage, case_mean_coverage, population_af, control_af, case_af)
             pass_filters = True
             total_variants += 1
-            if float(line_data[pvalue_case_twoside_index]) > 1e-10:
+            if float(line_data[pvalue_case_twoside_index]) > 1e-13:
                 case_population_test_fail += 1
+                failure_info += '1'
                 pass_filters = False
-            if float(line_data[pvalue_case_control_prop_index]) > 1e-3:
+            # if float(line_data[pvalue_case_control_prop_index]) > 1e-3:
+            if float(line_data[pvalue_case_control_binomial_index]) > 1e-5:
                 case_control_test_fail += 1
+                failure_info += '2'
                 pass_filters = False
             if control_mean_coverage < 10:
                 coverage_control_test_fail += 1
+                failure_info += '3'
                 pass_filters = False
             if case_mean_coverage < 10:
                 coverage_case_test_fail += 1
+                failure_info += '4'
                 pass_filters = False
-            if not pass_freq_order(population_af, control_af, case_af):
+            if not pass_freq_order_old(population_af, control_af, case_af):
                 af_order_test_fail += 1
+                failure_info += '5'
                 pass_filters = False
 
             # print line to the output file if passed all filters
             if pass_filters:
                 pass_variants += 1
                 print(line, end='', file=ofh)
+            elif failure_info in failure_nature_dict:
+                failure_nature_dict[failure_info] += 1
 
+    failure_info_keys_list = list(failure_nature_dict.keys())
+    failure_info_values_list = list(failure_nature_dict.values())
+    failure_info_values_list = [str(i) for i in failure_info_values_list]
     print("\t".join(["chunk", "total variants", "case_population_test_fail", "case_control_test_fail", "coverage_control_test_fail",
-                     "coverage_case_test_fail", "af_order_test_fail", "pass variants"]))
+                     "coverage_case_test_fail", "af_order_test_fail", "pass variants"] + failure_info_keys_list))
     print("\t".join([chunk_string, str(total_variants), str(case_population_test_fail), str(case_control_test_fail), str(coverage_control_test_fail),
-                     str(coverage_case_test_fail), str(af_order_test_fail), str(pass_variants)]))
+                     str(coverage_case_test_fail), str(af_order_test_fail), str(pass_variants)] + failure_info_values_list))
     '''
     print("case_population_test_fail\t" + str(case_population_test_fail))
     print("case_control_test_fail\t" + str(case_control_test_fail))
@@ -161,14 +174,14 @@ def mean(list):
 
 def pass_freq_order(population_af, control_af, case_af):
     # note the change in test in v7, the last condition was added
-    if case_af > population_af and population_af > control_af and abs(case_af - population_af) > 2 * abs(control_af - population_af):
+    if (case_af > population_af) and (population_af > control_af) and (abs(case_af - population_af) > 2 * abs(control_af - population_af)):
     # if case_af > population_af and case_af > control_af:
         return True
-    if case_af < population_af and population_af < control_af and abs(case_af - population_af) > 2 * abs(control_af - population_af):
+    if (case_af < population_af) and (population_af < control_af) and (abs(case_af - population_af) > 2 * abs(control_af - population_af)):
         return True
-    if case_af > control_af and control_af >= population_af:
+    if (case_af > control_af) and (control_af >= population_af):
         return True
-    if case_af < control_af and control_af <= population_af:
+    if (case_af < control_af) and (control_af <= population_af):
        return True
     return False
 
