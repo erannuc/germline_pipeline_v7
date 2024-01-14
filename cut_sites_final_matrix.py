@@ -75,3 +75,4 @@ with open(args.out, 'w') as ofh:
     for i in cut_sites.index:
         cut_site = str(cut_sites.at[i, 0]) + '_' + str(cut_sites.at[i, 1] + 1) + '_' + str(cut_sites.at[i, 2]) + '_' + str(cut_sites.at[i, 3]) 
         print(cut_site + '\t' + '\t'.join([str(cut_sites_vectors[i].get(s)) for s in range(nsamples)]), file=ofh)
+        cut_site = cut_sites[0] + '_' + data[1]
