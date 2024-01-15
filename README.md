@@ -16,6 +16,8 @@
 13. [Intersection with repeats db and Sane genome regions](#bedtools_intersection)
 14. [Variant clustring based on location and gnomAD frequency](#variant_clustering)
 15. [Filtering only cluster representatives as the filnal list](#cluster_representatives_extraction)
+16. [Converting to DS list format](#ds_format)
+17. [Collect data and stat from the DS tsv file] (#ds_data_extraction)
 
 This repository include scripts and instructutions to create germline analyses based on Nucleix NGS features for individual libraries and pools.
 The pipeline scripts are expected to work in AWS linux envirounment with Slurm HPC system configued.
@@ -392,7 +394,7 @@ python cluster_variants.py -i variants_reduced_formal_annotated_filtered_no_rep_
 python cluster_variants.py -i lists_debug_Dec27/all_new_stat_p_no_eg_plusinfo_formal_full_annotated_filtered_no_rep_sane_v7p.vcf -o lists_debug_Dec27/all_new_stat_p_no_eg_plusinfo_formal_full_annotated_filtered_no_rep_sane_clustered.vcf
 ```
 
-## Extraction of the cluster representatives as the filnal list <a name="cluster_representatives_extraction"></a>
+## Extraction of the cluster representatives as the final list <a name="cluster_representatives_extraction"></a>
 
 ```
 bcftools view -i 'RP==1' variants_reduced_new_formal_annotated_filtered_no_rep_sane_clustered_v7.vcf  > variants_reduced_new_formal_annotated_filtered_no_rep_sane_cluster_reps_v7.vcf
@@ -400,7 +402,7 @@ bcftools view -i 'RP==1' variants_reduced_new_formal_annotated_filtered_no_rep_s
 bcftools view -i 'RP==1'  all_new_stat_p_no_eg_plusinfo_formal_full_annotated_filtered_no_rep_sane_clustered.vcf > all_new_stat_p_no_eg_plusinfo_formal_full_annotated_filtered_no_rep_sane_clustered_representatives.vcf
 ```
 
-## Create a table in tabular format to handle to the DS team"></a>
+## Create a table in tabular format to handle to the DS team <a name="ds_format"></a>
 
 The final vcf file is converted to a more friendly tabular format. The final list is also arranged such the the frequencies and odds ratios are calculated according to the "minor" allele frequency (taken as the allele frequency in our control samples 
 
@@ -408,7 +410,7 @@ The final vcf file is converted to a more friendly tabular format. The final lis
 python vcf2ds.py -i lists_debug_Dec27/all_new_stat_p_no_eg_plusinfo_formal_full_annotated_filtered_no_rep_sane_clustered_representatives_manual.vcf -o GV_partial_no_eg_analysis_list_Dec23_for_DS.tsv
 ```
 
-## Collect data and stat from the DS tsv file
+## Collect data and stat from the DS tsv file <a name="ds_data_extraction"></a>
 
 The following scripts were used to extract information from teh DS tsv file
 
