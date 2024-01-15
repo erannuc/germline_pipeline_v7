@@ -318,6 +318,15 @@ The following command was used, for example, in V7:
 python convert2vcf_v7.py -i variants_reduced_v7.vcf  -o variants_reduced_formal_v7.vcf -case case_samples_v7.txt -control control_samples_v7.txt -local
 ```
 
+The script has an option to create per sample information (format section of formal vcf file), which include number of alt consensus reads, overall consensus reads and genotype. To run the script to create extensive format with information for each genotype. Example run in v7:
+```
+python convert2vcf_v7.py -i variants_reduced_v7.vcf  -o variants_reduced_formal_v7.vcf -case case_samples_v7.txt -control control_samples_v7.txt -control control_samples_no_eg_v7p.txt  -case case_samples_v7p.txt -all_samples -local -full
+```
+
+Note that that it is important to accurately provide the -control and -case files, as this annotation dicaate the calculation of case/control allele frequencies in the vcf
+The -all_samples option tells the script to report per-sample information in the format section for all samples, and not only to the samples which appear in the -control and -case files
+
+
 ## Adding biological annotations <a name="bcftools_annotations"></a>
 
 Biological annotation including host genes and effect of variant (coding, amino acid change, etc.) were added by csq program of bcftools (https://samtools.github.io/bcftools/howtos/csq-calling.html)
@@ -327,37 +336,38 @@ bcftools csq [input vcf file] -f [genome path] -g [annotations path] -p a > [out
 ```
 Note that the -p a indicates that the data is not phased. We don't know if adjucent variants falls on the same chromosome or on the sister chromosome.
 
-The following command was used, for example, in V4:
+The following command was used, for example, in V7:
 
 ```
-bcftools csq  variants_reduced_formal_v7.vcf.bgz -f ~/Genomes/hg38.fa -g ~/Genomes/hg38.gff3.gz -p a > variants_reduced_formal_annotated_v7.vcf
-bcftools csq  variants_reduced_formal_v7p.vcf.bgz -f ~/Genomes/hg38.fa -g ~/Genomes/hg38.gff3.gz -p a > variants_reduced_formal_annotated_v7p.vcf
-```
+bcftools csq all_new_stat_p_plusinfo_formal_full.vcf.bgz  -f ~/Genomes/hg38.fa -g ~/Genomes/hg38.gff3.gz -p a > all_new_stat_p_plusinfo_formal_full_annotated.vcf
+bcftools csq variants_reduced_v7_new_formal.vcf.bgz  -f ~/Genomes/hg38.fa -g ~/Genomes/hg38.gff3.gz -p a > variants_reduced_new_formal_annotated_v7.vcf
 
+```
 
 ## Variant filtering command examples with bcftools view <a name="bcftools_filters"></a>
 
 Filters based on variety of QC criteria. 
 
 Differences in filtering comparing to V4:
- <li> The cose-control is now based on propotions test (PR tag) and the final thershold set to < 1*10-3</li>
+ <li> The case-control is now based on propotions test (PR tag) and the final thershold set to < 1*10-3</li>
  <li> Variants with no calls in gnomAD are excluded </li>
  <li> Maximum homoplymer stretch is 5 (instead 6 before)</li>
  <li> Variants with Hardy–Weinberg test p-value with p-value (PH tag) < 1*E-3 are excluded</li>
+ <li> Variants with no information in gnomAD (or gnomaAD frequency is set to 8*E-16</li>
 <br>
 
 ```
-bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || GA == 8E-6 || PR > 1E-3 || HP > 5 || PH < 1E-3'  variants_reduced_formal_annotated_v7.vcf.bgz > variants_reduced_formal_annotated_filtered_v7.vcf
+bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || GA == 8E-6 || PR > 1E-3 || HP > 5 || PH < 1E-3' all_new_stat_p_plusinfo_formal_full_annotated.vcf  > all_new_stat_p_plusinfo_formal_full_annotated_filtered.vcf
 
-```
-```
 bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || GA == 8E-6 || PR > 1E-3 || HP > 5 || PH < 1E-3'  variants_reduced_formal_annotated_v7p.vcf.bgz > variants_reduced_formal_annotated_filtered_v7p.vcf
+
+bcftools view -e 'NF_CONT > 0.02 || NF_CASE > 0.02 || abs(AFRF_CASE - AFRF_CONT) > 0.3 || ((VF_CASE < 0.8) && (VN_CASE > 0)) || ACR > 2 || ACR < 0.5 || RN > 4 || GA == 8E-6 || PR > 1E-3 || HP > 5 || PH < 1E-3' all_new_stat_p_no_eg_plusinfo_formal_full_annotated.vcf  > all_new_stat_p_no_eg_plusinfo_formal_full_annotated_filtered.vcf
 ```
 
 
 ## Intersection with repeats db and Sane genome regions <a name="bedtools_intersection"></a>
 
-The output of the previous step is intersected with simple repeats file to **exclude** overlaps and then with Sabe genome bed file to **retain** more confident regions 
+The output of the previous step is intersected with simple repeats file to **exclude** overlaps and then with Sane genome bed file to **retain** more confident regions 
 ```
 bedtools intersect -header -v -a [vcf file] -b /home/eraneyal/Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed | bedtools intersect -header -u -a - -b /home/eraneyal/Genomes/Sane_hg38.bed > [vcf file no repeats and sane]
 ```
@@ -365,10 +375,11 @@ bedtools intersect -header -v -a [vcf file] -b /home/eraneyal/Genomes/ucsc_Repea
 Example commands from the v7 analyses:
 
 ```
-bedtools intersect -header -v -a variants_reduced_format_annotated_filtered_v7p.vcf -b /home/eraneyal/Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed | bedtools intersect -header -u -a - -b /home/eraneyal//Genomes/Sane_hg38.bed > variants_reduced_formal_annotated_filtered_no_rep_sane_v7p.vcf
-```
-```
-bedtools intersect -header -v -a variants_reduced_format_annotated_filtered_v7.vcf -b /home/eraneyal/Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed | bedtools intersect -header -u -a - -b /home/eraneyal//Genomes/Sane_hg38.bed > variants_reduced_formal_annotated_filtered_no_rep_sane_v7.vcf
+bedtools intersect -header -v -a variants_reduced_new_formal_annotated_filtered_v7.vcf -b /home/eraneyal/Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed | bedtools intersect -header -u -a - -b /home/eraneyal//Genomes/Sane_hg38.bed > variants_reduced_new_formal_annotated_filtered_no_rep_sane_v7.vcf
+
+bedtools intersect -header -v -a all_new_stat_p_plusinfo_formal_full_annotated_filtered.vcf  -b /home/eraneyal/Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed | bedtools intersect -header -u -a - -b /home/eraneyal/Genomes/Sane_hg38.bed > all_new_stat_p_plusinfo_formal_full_annotated_filtered_no_rep_sane_v7p.vcf
+
+bedtools intersect -header -v -a all_new_stat_p_no_eg_plusinfo_formal_full_annotated_filtered.vcf  -b /home/eraneyal/Genomes/ucsc_RepeatMasker_hg38_nucleix_sorted_simple.bed | bedtools intersect -header -u -a - -b /home/eraneyal/Genomes/Sane_hg38.bed > all_new_stat_p_no_eg_plusinfo_formal_full_annotated_filtered_no_rep_sane_v7p.vcf
 ```
 
 ## Clustering of variants based on close proximity and gnomAD variant frequency <a name="variant_clustering"></a>
@@ -376,16 +387,46 @@ bedtools intersect -header -v -a variants_reduced_format_annotated_filtered_v7.v
 In house script is used for variant clustering. The goal is to reduce effective number of variants for training and QC purposes
 
 ```
-python cluster_variants.py -i variants_reduced_formal_annotated_filtered_no_rep_sane_v7.vcf -o variants_reduced_formal_annotated_filtered_no_rep_sane_clustered_v7.vcf
-```
-```
+python cluster_variants.py -i variants_reduced_new_formal_annotated_filtered_no_rep_sane_v7.vcf -o variants_reduced_new_formal_annotated_filtered_no_rep_sane_clustered_v7.vcf
 python cluster_variants.py -i variants_reduced_formal_annotated_filtered_no_rep_sane_v7p.vcf -o variants_reduced_formal_annotated_filtered_no_rep_sane_clustered_v7p.vcf
+python cluster_variants.py -i lists_debug_Dec27/all_new_stat_p_no_eg_plusinfo_formal_full_annotated_filtered_no_rep_sane_v7p.vcf -o lists_debug_Dec27/all_new_stat_p_no_eg_plusinfo_formal_full_annotated_filtered_no_rep_sane_clustered.vcf
 ```
+
 ## Extraction of the cluster representatives as the filnal list <a name="cluster_representatives_extraction"></a>
 
 ```
-bcftools view -i 'RP==1' variants_reduced_formal_annotated_filtered_no_rep_sane_clustered_v7p.vcf  > variants_reduced_formal_annotated_filtered_no_rep_sane_cluster_reps_v7p.vcf
+bcftools view -i 'RP==1' variants_reduced_new_formal_annotated_filtered_no_rep_sane_clustered_v7.vcf  > variants_reduced_new_formal_annotated_filtered_no_rep_sane_cluster_reps_v7.vcf
+bcftools view -i 'RP==1' variants_reduced_new_formal_annotated_filtered_no_rep_sane_clustered_v7p.vcf  > variants_reduced_new_formal_annotated_filtered_no_rep_sane_cluster_reps_v7p.vcf
+bcftools view -i 'RP==1'  all_new_stat_p_no_eg_plusinfo_formal_full_annotated_filtered_no_rep_sane_clustered.vcf > all_new_stat_p_no_eg_plusinfo_formal_full_annotated_filtered_no_rep_sane_clustered_representatives.vcf
 ```
+
+## Create a table in tabular format to handle to the DS team"></a>
+
+The final vcf file is converted to a more friendly tabular format. The final list is also arranged such the the frequencies and odds ratios are calculated according to the "minor" allele frequency (taken as the allele frequency in our control samples 
+
 ```
-bcftools view -i 'RP==1' variants_reduced_formal_annotated_filtered_no_rep_sane_clustered_v7.vcf  > variants_reduced_formal_annotated_filtered_no_rep_sane_cluster_reps_v7.vcf
+python vcf2ds.py -i lists_debug_Dec27/all_new_stat_p_no_eg_plusinfo_formal_full_annotated_filtered_no_rep_sane_clustered_representatives_manual.vcf -o GV_partial_no_eg_analysis_list_Dec23_for_DS.tsv
 ```
+
+## Collect data and stat from the DS tsv file
+
+The following scripts were used to extract information from teh DS tsv file
+
+The following example collects odds ratios and gnomad frequencies from the table and count SNVs, insertions and deletions
+```
+python ds_list_stat.py -i GV_partial_analysis_list_Dec23_for_DS.tsv > partial_gnomad_odd_ratios.tsv
+```
+
+The following example collects from the list odds ratios in the training samples and another test subset
+
+```
+python check_wgs_ratios_ds_format.py -i GV_partial_analysis_list_Dec23_for_DS.tsv -o train_test_odds_ratios.txt
+```
+
+
+
+
+
+
+
+
