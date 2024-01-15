@@ -17,7 +17,7 @@
 14. [Variant clustring based on location and gnomAD frequency](#variant_clustering)
 15. [Filtering only cluster representatives as the filnal list](#cluster_representatives_extraction)
 16. [Converting to DS list format](#ds_format)
-17. [Collect data and stat from the DS tsv file] (#ds_data_extraction)
+17. [Collect data and stat from the DS tsv file](#ds_data_extraction)
 
 This repository include scripts and instructutions to create germline analyses based on Nucleix NGS features for individual libraries and pools.
 The pipeline scripts are expected to work in AWS linux envirounment with Slurm HPC system configued.
@@ -402,13 +402,38 @@ bcftools view -i 'RP==1' variants_reduced_new_formal_annotated_filtered_no_rep_s
 bcftools view -i 'RP==1'  all_new_stat_p_no_eg_plusinfo_formal_full_annotated_filtered_no_rep_sane_clustered.vcf > all_new_stat_p_no_eg_plusinfo_formal_full_annotated_filtered_no_rep_sane_clustered_representatives.vcf
 ```
 
-## Create a table in tabular format to handle to the DS team <a name="ds_format"></a>
+## Converting to DS list format <a name="ds_format"></a>
 
-The final vcf file is converted to a more friendly tabular format. The final list is also arranged such the the frequencies and odds ratios are calculated according to the "minor" allele frequency (taken as the allele frequency in our control samples 
+The final vcf file is converted to a more friendly tabular format for the DS team. The final list is also arranged such the the frequencies and odds ratios are calculated according to the "minor" allele frequency (taken as the allele frequency in our control samples 
 
 ```
 python vcf2ds.py -i lists_debug_Dec27/all_new_stat_p_no_eg_plusinfo_formal_full_annotated_filtered_no_rep_sane_clustered_representatives_manual.vcf -o GV_partial_no_eg_analysis_list_Dec23_for_DS.tsv
 ```
+The columns in the output list are:
+```
+hg38_chr – chromosome according to hg38
+hg38_pos – genomic position according to hg38
+nucleix_pos – genomic position according to Nucleix features. Might be different from hg38_pos for deletions.
+ref – reference base in the position according to hg38
+alt - alternative base/indel which might be found in that site
+gv – the germline variant, defined as the minor allele genotype in the controls cohort at that position. Could be the alt base (most often) or the reference base.
+annotation – annotations based on bcftools csq program. This field is populated only for variants within proteins
+p_control_gnomad – p-value of binomial test between the control gv allele frequency and gnomAD frequency.
+p_case_gnomad - p-value of binomial test between the cases gv allele frequency and gnomAD frequency.
+p_case_control_binomial - p-value of binomial test between the cases gv allele frequency and controls gv allele frequency.
+p_case_control_prop - p-value of proportions test between the cases gv allele frequency and controls gv allele frequency.
+gv_alleles_control – number of gv alleles in the control subjects of the training cohort
+total_alleles_control – total number of alleles in the control subjects of the training cohort (2 x number of control subjects)
+af_control – gv allele frequency in the control subjects of the training cohort
+gv_alleles_case - number of gv alleles in the case subjects of the training cohort
+total_alleles_case - total number of alleles in the case subjects of the training cohort (2 x number of case subjects)
+af_case - gv allele frequency in the case subjects of the training cohort
+odds_ratio - af_case / af_control
+gnomad_v3.1_af - gv frequency in the population database gnomAD v3.1
+for each sample: number of gv alleles. Could be 0,1,2 or -1 for no data. -1 should appear in this table only for training samples, so no need to impute values of validation subjects.
+```
+
+
 
 ## Collect data and stat from the DS tsv file <a name="ds_data_extraction"></a>
 
