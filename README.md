@@ -450,8 +450,11 @@ The following example collects from the list odds ratios in the training samples
 python check_wgs_ratios_ds_format.py -i GV_partial_analysis_list_Dec23_for_DS.tsv -o train_test_odds_ratios.txt
 ```
 
+The last example produces a file with values of the odds_ratio in the training set and test set. The following awk command allow you to get the total number of lines in which there is agreement in the direction of the tarin and test odds_artios (both smaller than one or larger than one): 
 
-
+```
+awk 'BEGIN {sum=0} {if (log($1) * log($2) > 1) sum+=1} END {print(sum)}' train_test_odds_ratios.txt
+```
 
 
 
