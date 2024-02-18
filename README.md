@@ -18,7 +18,8 @@
 15. [Filtering only cluster representatives as the filnal list](#cluster_representatives_extraction)
 16. [Converting to DS list format](#ds_format)
 17. [Collect data and stat from the DS tsv file](#ds_data_extraction)
-
+18. [Create list of variants for IP purposes] (#ip)
+19. 
 This repository include scripts and instructutions to create germline analyses based on Nucleix NGS features for individual libraries and pools.
 The pipeline scripts are expected to work in AWS linux envirounment with Slurm HPC system configued.
 
@@ -434,7 +435,6 @@ for each sample: number of gv alleles. Could be 0,1,2 or -1 for no data. -1 shou
 ```
 
 
-
 ## Collect data and stat from the DS tsv file <a name="ds_data_extraction"></a>
 
 The following scripts were used to extract information from teh DS tsv file
@@ -456,7 +456,14 @@ The last example produces a file with values of the odds_ratio in the training s
 awk 'BEGIN {sum=0} {if (log($1) * log($2) > 1) sum+=1} END {print(sum)}' train_test_odds_ratios.txt
 ```
 
+## Create list of variants for IP purposes <a name="ip"></a>
+
+A scripts was used to create a unified list of variants for IP (patents). It included one or more lists of "real" putative lists obtained using the above pipeline and add camouflage variants.
 
 
+```
+python ip_list.py
+```
 
+Notes: the real list(s) and the camouflage should be in official vcf format already. One tage is added to the INFO field of the output list - AI (analysis index) which detemine from which list(s) the variants oroginated (the upper index is of the camouflage) list. A variant can originate from several input list. E. g AI=12 means that the variant appear in the first two input lists.
 
