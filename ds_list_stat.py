@@ -44,4 +44,4 @@ if __name__ == "__main__":
         # print(data.at[i, 'gnomad_v3.1_af'])
 
 
-    # print(snv_counter, del_counter, ins_counter)
+    print(snv_counter, del_counter, ins_counter)
