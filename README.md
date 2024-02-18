@@ -18,8 +18,8 @@
 15. [Filtering only cluster representatives as the filnal list](#cluster_representatives_extraction)
 16. [Converting to DS list format](#ds_format)
 17. [Collect data and stat from the DS tsv file](#ds_data_extraction)
-18. [Create list of variants for IP purposes] (#ip)
-19. 
+18. [Create list of variants for IP purposes](#ip)
+    
 This repository include scripts and instructutions to create germline analyses based on Nucleix NGS features for individual libraries and pools.
 The pipeline scripts are expected to work in AWS linux envirounment with Slurm HPC system configued.
 
