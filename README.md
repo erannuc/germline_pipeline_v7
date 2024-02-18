@@ -467,3 +467,15 @@ python ip_list.py
 
 Notes: the real list(s) and the camouflage should be in official vcf format already. One tage is added to the INFO field of the output list - AI (analysis index) which detemine from which list(s) the variants oroginated (the upper index is of the camouflage) list. A variant can originate from several input list. E. g AI=12 means that the variant appear in the first two input lists.
 
+The lists that were used for IP list on Feb 2024 (hardcoded in the script)"
+```
+real:
+lists_debug_Dec27/variants_reduced_new_formal_annotated_filtered_no_rep_sane_clustered.vcf
+lists_debug_Dec27/all_new_stat_p_plusinfo_formal_full_annotated_filtered_no_rep_sane_clustered.vcf
+lists_debug_Dec27/all_new_stat_p_no_eg_plusinfo_formal_full_annotated_filtered_no_rep_sane_clustered.vcf
+
+camouflage:
+all_stat_reduced_ip_plusinfo_formal_annotated.vcf
+
+```
+
